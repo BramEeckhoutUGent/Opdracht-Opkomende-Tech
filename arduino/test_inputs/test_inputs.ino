@@ -10,13 +10,13 @@
 // Op deze manier heb ik al meerdere malen mezelf gevangen op het verkeerd verbinden van de poorten
 
 #define TFT_CS   10
-#define TFT_DC   41
-#define TFT_RST  15
-#define SD_CS    9
+#define TFT_DC   9
+#define TFT_RST  8
 #define SPI_MOSI 11
-#define SPI_MISO 13
-#define SPI_SCK  12
+#define SPI_MISO 12
+#define SPI_SCK  13
 
+#define SD_CS    9
 Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC, TFT_RST);
 
 // Volgende code werd deels geschreven door Gemini: lijn 30-58
