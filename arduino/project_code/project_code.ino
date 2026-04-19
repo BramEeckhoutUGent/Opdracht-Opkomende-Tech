@@ -6,11 +6,12 @@
 #include "esp_partition.h"
 #include <bb_spi_lcd.h>
 #include <AnimatedGIF.h>
-#include "?????.h" // Dit is de gif voor deze taak
+#include "visje.h" // Dit is de gif voor deze taak
+
+#define GifData visje // Dit stuurt de GIF naar het scherm
+#define PUSH_BUTTION_PIN 13
 
 BB_SPI_LCD tft;
-
-#define GifData ?????? // Dit stuurt de GIF naar het scherm
 
 void setup() {
   Serial.begin(115200);
