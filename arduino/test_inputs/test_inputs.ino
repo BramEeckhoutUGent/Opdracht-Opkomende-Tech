@@ -7,7 +7,7 @@
 #include <Adafruit_ILI9341.h>
 
 // ipv het bestandje TFT_eSPI.h aan te passen, schrijf ik het liever voluit
-// Op deze manier heb ik al meerdere malen mezelf gevangen op het verkeerd verbinden
+// Op deze manier heb ik al meerdere malen mezelf gevangen op het verkeerd verbinden van de poorten
 
 #define TFT_CS   10
 #define TFT_DC   41
