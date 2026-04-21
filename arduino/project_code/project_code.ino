@@ -6,7 +6,7 @@
 #include "esp_partition.h"
 #include <bb_spi_lcd.h>
 #include <AnimatedGIF.h>
-#include "JasjePixel.h" // Dit is de gif voor deze taak
+#include "gif_files/JasjePixel.h" // Dit is de gif voor deze taak
 
 #define GifData JasjePixel // Dit stuurt de GIF naar het scherm
 
@@ -14,7 +14,7 @@ BB_SPI_LCD tft;
 
 void setup() {
   Serial.begin(115200);
-  tft.begin(LCD_ILI9341, FLAGS_NONE, 40000000, 8, 18, 17, -1, 10, 9, 3);
+  tft.begin(LCD_ILI9341, FLAGS_NONE, 40000000, 10, 9, 8, -1, 13, 11, 12);
   tft.setRotation(LCD_ORIENTATION_90); // Value=90 omdat de gifs van formaat zijn: 320x240, de gif's worden in landscape mode afgespeeld
   tft.fillScreen(TFT_BLACK);
 
@@ -57,6 +57,7 @@ AnimatedGIF *openGif(uint8_t *gifdata, size_t gifsize) {
   }
   else 
   {
+    // Hier stond in de tutorial een reeks van error messages, heb deze weg gelaten voor ons project
   }
 }
 
