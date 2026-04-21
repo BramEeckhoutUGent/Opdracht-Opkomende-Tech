@@ -15,7 +15,7 @@ BB_SPI_LCD tft;
 
 void setup() {
   Serial.begin(115200);
-  tft.begin(LCD_ILI9341, FLAGS_NONE, 40000000, 8, 18, 17, -1, -1, 9, 3); //
+  tft.begin(LCD_ILI9341, FLAGS_NONE, 40000000, 46, 9, 10, -1, 13, 11, 12)
   tft.setRotation(LCD_ORIENTATION_90); // Value=90 omdat de gifs van formaat zijn: 320x240, de gif's worden in landscape mode afgespeeld
   tft.fillScreen(TFT_BLACK);
 
