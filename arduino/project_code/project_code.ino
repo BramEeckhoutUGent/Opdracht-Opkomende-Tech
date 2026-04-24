@@ -35,8 +35,8 @@
 #define DF_TX 17
 
 // --- Drukknoppen ---
-#define Volgende_knop 15
-#define Actie_knop 16
+#define Volgende_knop 16
+#define Actie_knop 15
 
 // --- LED's ---
 
