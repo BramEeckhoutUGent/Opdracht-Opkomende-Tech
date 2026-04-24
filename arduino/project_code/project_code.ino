@@ -1,77 +1,180 @@
-// Deze code werd gebaseerd op de Youtube Tutorial: https://youtu.be/omUWkUqFYrQ
-// De code wordt aangepast voor dit project
-// AI wordt gebruikt om de code te verbeteren
+// De code voor het tonen van GIF's werd deels gebaseerd op de Youtube Tutorial: https://youtu.be/omUWkUqFYrQ
+// De code voor het afspelen van audio bestanden via de DFPlayer mini werd deels gebaseerd op de Youtube Tutorial: https://www.youtube.com/watch?v=P42ICrgAtS4 
+// De code voor dit project werd zo veel mogelijk zelf geschreven, AI werd gebruikt om de code te verbeteren.
+// Code die door AI geschreven werd, wordt aangegeven in de lijn.
+
+
+// ------ Installeren van libraries ------
 
 #include "esp_flash.h"
 #include "esp_partition.h"
 #include <bb_spi_lcd.h>
 #include <AnimatedGIF.h>
-#include "gif_files/JasjePixel.h" // Dit is de gif voor deze taak
+#include "SoftwareSerial.h"
+#include "DFRobotDFPlayerMini.h"
 
+
+// ------ GIF bestanden ------
+
+#include "gif_files/JasjePixel.h" // Dit is de gif voor deze taak
 #define GifData JasjePixel // Dit stuurt de GIF naar het scherm
 
+
+// ------ Definieer pinnen -------
+// --- 2.8 Inch TFT Display ---
+#define TFT_CS    10
+#define TFT_DC    9
+#define TFT_RST   8
+#define TFT_LED   -1 // waarde is -1 want deze sturen we niet aan door een poort, maar verbinden met 3.3V poort
+#define TFT_MISO  13
+#define TFT_MOSI  11
+#define TFT_CLK   12
+
+// --- DFPlayer Mini ---
+#define DF_RX 18 
+#define DF_TX 17
+
+// --- Drukknoppen ---
+#define Volgende_knop 15
+#define Actie_knop 16
+
+// --- LED's ---
+
+
+
+// ------ Start code -------
+// --- Objecten ---
 BB_SPI_LCD tft;
+SoftwareSerial dfSS(DF_RX, DF_TX);
+DFRobotDFPlayerMini myDFPlayer;
+AnimatedGIF gif;
+
+// --- Status managment ---
+// Deze code werd gegenereerd door AI (gemini)
+int Huidige_taak = 0;
+bool Wordt_actie_getoond = false; // Zijn we momenteel de actie-afbeelding aan het tonen?
+bool Taak_gedaan = false;
+
+// --- GIF data ---
+#define GIF_COUNT 3 // Het aantal taakjes van de Planda-beer
+const uint8_t* gifData[GIF_COUNT] = {gif1, gif2, gif3};
+const size_t gifSizes[GIF_COUNT] = {sizeof(gif1), sizeof(gif2), sizeof(gif3)};
+
+// --- Debounce variabelen ---
+// Deze code werd gegenereerd door AI (gemini)
+int lastNextState = -1, nextState = -1;
+unsigned long lastNextDebounce = 0;
+int lastActionState = -1, actionState = -1;
+unsigned long lastActionDebounce = 0;
+
+
+// -----
 
 void setup() {
   Serial.begin(115200);
-  tft.begin(LCD_ILI9341, FLAGS_NONE, 40000000, 10, 9, 8, -1, 13, 11, 12);
-  tft.setRotation(LCD_ORIENTATION_90); // Value=90 omdat de gifs van formaat zijn: 320x240, de gif's worden in landscape mode afgespeeld
+  dfSS.begin(9600);
+  
+  pinMode(Volgende_knop, INPUT_PULLUP);
+  pinMode(Actie_knop, INPUT_PULLUP);
+
+  tft.begin(LCD_ILI9341, FLAGS_NONE, 40000000, TFT_CS, TFT_DC, TFT_RST, TFT_LED, TFT_MISO, TFT_MOSI, TFT_CLK);
+  tft.setRotation(LCD_ORIENTATION_90);
   tft.fillScreen(TFT_BLACK);
 
-  AnimatedGIF *gif;
-  gif = openGif((uint8_t *)GifData, sizeof(GifData));
-  if (gif == NULL) {
-    Serial.println("De gif kan niet worden getoond"); // Controle punt: 
-    while (true) {
-    }
+  if (!myDFPlayer.begin(dfSS)) {
+    Serial.println("DFPlayer error");
+  } else {
+    myDFPlayer.volume(20); // Geluid van 0 tot 30
   }
 
-  while (true) {
-    gif->playFrame(false, NULL);
-  }
+  loadGif(Huidige_taak); // Dit toont de eerste taak op het scherm
 }
 
 void loop() {
-  delay(1);
-}
+  if (Taak_gedaan) return;
 
-AnimatedGIF *openGif(uint8_t *gifdata, size_t gifsize) {
-  AnimatedGIF *gif;
-  gif = (AnimatedGIF *)malloc(sizeof(AnimatedGIF));
-  if (gif == NULL) {
-    Serial.println("Er is niet genoeg RAM om de gif af te laten spelen! Probeer de gif te comprimeren.");
-    return NULL;
-  }
-
-  gif->begin(GIF_PALETTE_RGB565_BE);
-
-  if (gif->open(gifdata, gifsize, GIFDraw)) {
-    Serial.printf("gif is geopend; Canvas size = %d x %d\n", gif->getCanvasWidth(), gif->getCanvasHeight());
-    Serial.printf("geheugen dat in beslag genomen is %ld (%2.2f MB)", gifsize, (float)gifsize / (1024 * 1024));
-    gif->setDrawType(GIF_DRAW_COOKED);
-    if (gif->allocFrameBuf(GIFAlloc) != GIF_SUCCESS) {
-      Serial.println("Niet genoeg RAM geheugen voor de frame buffer!");
-      return NULL;
+  // --- Optie 1: Ga door naar de volgende taak ---
+  if (isButtonPressed(Volgende_knop, nextState, lastNextState, lastNextDebounce)) { // Deze code werd gegenereerd door AI (gemini)
+    Huidige_taak++;                                                                 // |||||||||||||||||||||||||||||||||||||||||||
+    Wordt_actie_getoond = false;                                                    // |||||||||||||||||||||||||||||||||||||||||||
+    
+    if (Huidige_taak < GIF_COUNT) {
+      Serial.printf("Naar taak %d\n", Huidige_taak + 1);
+      tft.fillScreen(TFT_BLACK);
+      loadGif(Huidige_taak);
+    } else {
+      Serial.println("Taak is gedaan");
+      tft.fillScreen(TFT_BLACK);
+      Taak_gedaan = true;
     }
-    return gif;
   }
-  else 
-  {
-    // Hier stond in de tutorial een reeks van error messages, heb deze weg gelaten voor ons project
+
+  // --- Optie 2: Geef extra instructies/extra motivatie ---
+  if (!Taak_gedaan && isButtonPressed(Actie_knop, actionState, lastActionState, lastActionDebounce)) { // Deze code werd gegenereerd door AI (gemini)
+    if (!Wordt_actie_getoond) {                                                                        // |||||||||||||||||||||||||||||||||||||||||||
+      Serial.println("Kindje wil extra hulp");                                                         // |||||||||||||||||||||||||||||||||||||||||||
+      Wordt_actie_getoond = true;                                                                      // |||||||||||||||||||||||||||||||||||||||||||
+      
+      myDFPlayer.play(1); // Speel geluidje
+      
+      tft.fillScreen(TFT_BLACK);
+      showActionImage(); // Hint wordt getoond 
+    }
+  }
+
+  // --- Rendering ---
+  if (!Wordt_actie_getoond && !Taak_gedaan) {
+    gif.playFrame(false, NULL); // Speel de GIF af
   }
 }
 
-void *GIFAlloc(uint32_t u32Size) {
-  return malloc(u32Size);
+
+// ------ Functie om een nieuwe GIF klaar te zetten ------
+
+void loadGif(int index) {
+  gif.close();
+  gif.begin(GIF_PALETTE_RGB565_BE);
+  if (gif.open((uint8_t *)gifData[index], gifSizes[index], GIFDraw)) {
+    gif.setDrawType(GIF_DRAW_COOKED);
+    gif.allocFrameBuf(GIFAlloc);
+  }
 }
 
-void GIFFree(void *p) {
-  free(p);
+
+// ------ Functie om de statische actie-afbeelding te tonen ------
+
+void showActionImage() {
+  gif.close();
+  gif.begin(GIF_PALETTE_RGB565_BE);
+  if (gif.open((uint8_t *)???, sizeof(???), GIFDraw)) {
+    gif.setDrawType(GIF_DRAW_COOKED);
+    gif.allocFrameBuf(GIFAlloc);
+    gif.playFrame(false, NULL);
+  }
 }
 
+
+// ------ knop-checker ------
+// Deze code werd gegenereerd door AI (gemini)
+bool isButtonPressed(int pin, int &state, int &lastState, unsigned long &lastDebounce) {
+  int reading = digitalRead(pin);
+  if (reading != lastState) lastDebounce = millis();
+  if ((millis() - lastDebounce) > 50) {
+    if (reading != state) {
+      state = reading;
+      return state == LOW;
+    }
+  }
+  lastState = reading;
+  return false;
+}
+
+
+// ------ GIF helper functies (Nodig voor bb_spi_lcd) ------
+
+void *GIFAlloc(uint32_t u32Size) { return malloc(u32Size); }
+void GIFFree(void *p) { free(p); }
 void GIFDraw(GIFDRAW *pDraw) {
-  if (pDraw->y == 0) {
-    tft.setAddrWindow(pDraw->iX, pDraw->iY, pDraw->iWidth, pDraw->iHeight);
-  }
+  if (pDraw->y == 0) tft.setAddrWindow(pDraw->iX, pDraw->iY, pDraw->iWidth, pDraw->iHeight);
   tft.pushPixels((uint16_t *)pDraw->pPixels, pDraw->iWidth);
 }
