@@ -5,7 +5,7 @@ In dit bestand kun je meer info vinden over hoe alles te verbinden.
 
 ## wiring diagrama
 
-![Opstelling Planda-beer](<imgs/Opstelling Planda-beer.jpg>)
+![Opstelling Planda-beer](<../imgs/Opstelling Planda-beer.jpg>)
 
 ## Installeren ESP32-S3 N16R8 Devboard
 Programmeren van de ESP32-S3 gebeurt eenvoudig via de USB-poort. Volg onderstaande stappen om alles correct in te stellen in de Arduino IDE.
