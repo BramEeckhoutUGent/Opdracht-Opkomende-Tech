@@ -245,3 +245,20 @@ void loop() {
     Serial.println("Herhaal instructie");
   }
 }
+if (digitalRead(buttonBlue) == LOW) {
+  Serial.println("Stap bevestigd");
+
+  // Bevestigingsgeluid afspelen
+  myDFPlayer.play(2);   // bv. 002.mp3 = confirm sound => juiste sound moet nog opgeslagen worden op sd kaartje
+
+  // Groene LED (neus)
+  digitalWrite(ledGreen, HIGH);
+  delay(500);
+  digitalWrite(ledGreen, LOW);
+
+  // Volgende stap laden (GIF)
+  tft.fillScreen(TFT_BLACK);
+  showNextStep();  // moet nog gekoppeld worden aan juiste functie
+
+  delay(300); // kleine buffer
+}
