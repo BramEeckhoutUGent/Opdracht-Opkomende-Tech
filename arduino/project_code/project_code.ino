@@ -178,3 +178,7 @@ void GIFDraw(GIFDRAW *pDraw) {
   if (pDraw->y == 0) tft.setAddrWindow(pDraw->iX, pDraw->iY, pDraw->iWidth, pDraw->iHeight);
   tft.pushPixels((uint16_t *)pDraw->pPixels, pDraw->iWidth);
 }
+
+
+// ------ TEST -------
+
