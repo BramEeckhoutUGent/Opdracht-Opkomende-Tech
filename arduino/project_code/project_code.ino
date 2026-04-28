@@ -184,3 +184,7 @@ void GIFDraw(GIFDRAW *pDraw) {
 # wanneer knop ingedrukt wordt speelt bevestigings geluid af en begint 
 het lampje van de knop te pinken totdat er een volgende actie wordt geactiveert 
 om naar de volgende stap te gaan, standaard branden de ledlichtjes dus
+
+het groene lichtje op de neus moet oplichten wanneer er hij op het blauwe licht heeft gedrukt en dus de actie voltooid heeft
+
+dus na actie, kiest hij voor hint (oranje lichtje knippert totdat blauw lichtje ingedrukt wordt) of voor volgende stap (groen lichtje brand kort)
