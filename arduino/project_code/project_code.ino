@@ -188,3 +188,59 @@ om naar de volgende stap te gaan, standaard branden de ledlichtjes dus
 het groene lichtje op de neus moet oplichten wanneer er hij op het blauwe licht heeft gedrukt en dus de actie voltooid heeft
 
 dus na actie, kiest hij voor hint (oranje lichtje knippert totdat blauw lichtje ingedrukt wordt) of voor volgende stap (groen lichtje brand kort)
+
+// TEST: Interactie knoppen + LED feedback
+
+const int buttonBlue = 4;
+const int buttonOrange = 5;
+
+const int ledBlue = 6;
+const int ledGreen = 7;
+const int ledOrange = 15;
+
+void setup() {
+  Serial.begin(115200);
+
+  pinMode(buttonBlue, INPUT_PULLUP);
+  pinMode(buttonOrange, INPUT_PULLUP);
+
+  pinMode(ledBlue, OUTPUT);
+  pinMode(ledGreen, OUTPUT);
+  pinMode(ledOrange, OUTPUT);
+
+  // standaard toestand
+  digitalWrite(ledBlue, HIGH);
+  digitalWrite(ledOrange, HIGH);
+  digitalWrite(ledGreen, LOW);
+}
+
+void loop() {
+
+  // blauwe knop = bevestigen
+  if (digitalRead(buttonBlue) == LOW) {
+    Serial.println("Stap bevestigd");
+
+    // groene LED = feedback
+    digitalWrite(ledGreen, HIGH);
+    delay(500);
+    digitalWrite(ledGreen, LOW);
+
+    Serial.println("Ga naar volgende stap");
+    delay(500);
+  }
+
+  // oranje knop = hint
+  if (digitalRead(buttonOrange) == LOW) {
+    Serial.println("Hint gevraagd");
+
+    // knipperende LED
+    for (int i = 0; i < 6; i++) {
+      digitalWrite(ledOrange, HIGH);
+      delay(300);
+      digitalWrite(ledOrange, LOW);
+      delay(300);
+    }
+
+    Serial.println("Herhaal instructie");
+  }
+}
