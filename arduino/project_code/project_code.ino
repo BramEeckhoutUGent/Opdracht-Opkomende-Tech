@@ -191,13 +191,14 @@ dus na actie, kiest hij voor hint (oranje lichtje knippert totdat blauw lichtje 
 
 // TEST: Interactie knoppen + LED feedback
 
-const int buttonBlue = 4;
-const int buttonOrange = 5;
+// ------ INPUTS (knoppen) ------
+const int buttonBlue = 16;     // blauwe knop (rechter oor)
+const int buttonOrange = 15;   // gele/oranje knop (linker oor)
 
-const int ledBlue = 6;
-const int ledGreen = 7;
-const int ledOrange = 15;
-
+// ------ OUTPUTS (LEDs) ------
+const int ledBlue = 4;         // blauwe LED
+const int ledGreen = 5;        // groene LED (neus)
+const int ledOrange = 6;       // gele/oranje LED
 void setup() {
   Serial.begin(115200);
 
