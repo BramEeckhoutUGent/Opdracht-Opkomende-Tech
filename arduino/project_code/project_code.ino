@@ -181,4 +181,6 @@ void GIFDraw(GIFDRAW *pDraw) {
 
 
 // ------ TEST -------
-
+# wanneer knop ingedrukt wordt speelt bevestigings geluid af en begint 
+het lampje van de knop te pinken totdat er een volgende actie wordt geactiveert 
+om naar de volgende stap te gaan, standaard branden de ledlichtjes dus
