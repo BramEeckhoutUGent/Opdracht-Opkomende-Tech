@@ -171,4 +171,52 @@ void loop() {
       }
     }
   }
+}µ
+
+
+code die werkt voor twee knoppen en twee lichtjes en lichtjes flikkeren:
+
+
+const int led1 = 17;
+const int led2 = 18;
+
+const int button1 = 4;
+const int button2 = 5;
+
+void setup() {
+  pinMode(led1, OUTPUT);
+  pinMode(led2, OUTPUT);
+
+  pinMode(button1, INPUT_PULLUP);
+  pinMode(button2, INPUT_PULLUP);
+
+  digitalWrite(led1, HIGH);  // LED 1 standaard aan
+  digitalWrite(led2, HIGH);  // LED 2 standaard aan
+}
+
+void loop() {
+
+  // --- Knop 1 → LED 1 knipperen ---
+  if (digitalRead(button1) == LOW) {
+    unsigned long start = millis();
+    while (millis() - start < 3000) {
+      digitalWrite(led1, HIGH);
+      delay(200);
+      digitalWrite(led1, LOW);
+      delay(200);
+    }
+    digitalWrite(led1, HIGH); // terug constant aan
+  }
+
+  // --- Knop 2 → LED 2 knipperen ---
+  if (digitalRead(button2) == LOW) {
+    unsigned long start = millis();
+    while (millis() - start < 3000) {
+      digitalWrite(led2, HIGH);
+      delay(200);
+      digitalWrite(led2, LOW);
+      delay(200);
+    }
+    digitalWrite(led2, HIGH); // terug constant aan
+  }
 }
