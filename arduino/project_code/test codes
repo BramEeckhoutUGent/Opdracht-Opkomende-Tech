@@ -1,0 +1,82 @@
+// ESP32-S3 + 2 knoppen + 2 LEDs
+// Werking:
+// - Druk knop 1 in -> LED 1 brandt
+// - Druk knop 2 in -> LED 2 brandt
+// - Als slechts ÉÉN knop ingedrukt is,
+//   dan knippert de andere LED gedurende 5 seconden
+
+// ===== PINNEN =====
+const int knop1 = 4;
+const int knop2 = 5;
+
+const int led1 = 18;
+const int led2 = 19;
+
+// ===== VARIABELEN =====
+unsigned long blinkStart = 0;
+bool blinking = false;
+int blinkLed = 0;
+
+unsigned long vorigeBlink = 0;
+bool ledState = false;
+
+void setup() {
+  pinMode(knop1, INPUT_PULLUP);
+  pinMode(knop2, INPUT_PULLUP);
+
+  pinMode(led1, OUTPUT);
+  pinMode(led2, OUTPUT);
+
+  digitalWrite(led1, LOW);
+  digitalWrite(led2, LOW);
+
+  Serial.begin(115200);
+}
+
+void loop() {
+
+  // INPUT_PULLUP:
+  // knop ingedrukt = LOW
+  bool k1 = digitalRead(knop1) == LOW;
+  bool k2 = digitalRead(knop2) == LOW;
+
+  // Normale LEDs
+  digitalWrite(led1, k1);
+  digitalWrite(led2, k2);
+
+  // Enkel 1 knop ingedrukt?
+  if ((k1 && !k2) || (!k1 && k2)) {
+
+    // Start knipperen als nog niet bezig
+    if (!blinking) {
+      blinking = true;
+      blinkStart = millis();
+
+      // Welke LED moet knipperen?
+      if (k1) {
+        blinkLed = led2;
+      } else {
+        blinkLed = led1;
+      }
+    }
+  }
+
+  // Knipperlogica
+  if (blinking) {
+
+    // Stop na 5 seconden
+    if (millis() - blinkStart >= 5000) {
+      blinking = false;
+      digitalWrite(blinkLed, LOW);
+    } else {
+
+      // Knipper elke 300 ms
+      if (millis() - vorigeBlink >= 300) {
+        vorigeBlink = millis();
+
+        ledState = !ledState;
+        digitalWrite(blinkLed, ledState);
+      }
+    }
+  }
+}
