@@ -35,11 +35,13 @@
 #define DF_TX 17
 
 // --- Drukknoppen ---
-#define Volgende_knop 16
-#define Actie_knop 15
+#define Blauwe_knop 16
+#define Orange_knop 15
 
 // --- LED's ---
-
+#define led1 2 
+#define led2 3
+#define ledGreen 4
 
 
 // ------ Start code -------
@@ -55,10 +57,15 @@ int Huidige_taak = 0;
 bool Wordt_actie_getoond = false; // Zijn we momenteel de actie-afbeelding aan het tonen?
 bool Taak_gedaan = false;
 
-// --- GIF data ---
-#define GIF_COUNT 3 // Het aantal taakjes van de Planda-beer
-const uint8_t* gifData[GIF_COUNT] = {gif1, gif2, gif3};
-const size_t gifSizes[GIF_COUNT] = {sizeof(gif1), sizeof(gif2), sizeof(gif3)};
+// --- GIF data voor de taakjes ---
+#define GIF_COUNT 3
+const uint8_t* taakgifData[GIF_COUNT] = {gif1, gif2, gif3};
+const size_t taakgifSizes[GIF_COUNT] = {sizeof(gif1), sizeof(gif2), sizeof(gif3)};
+
+// --- GIF data voor de hints ---
+const uint8_t* hintgifData[GIF_COUNT] = {gif1, gif2, gif3};
+const size_t hintgifSizes[GIF_COUNT] = {sizeof(gif1), sizeof(gif2), sizeof(gif3)};
+
 
 // --- Debounce variabelen ---
 // Deze code werd gegenereerd door AI (gemini)
@@ -68,15 +75,31 @@ int lastActionState = -1, actionState = -1;
 unsigned long lastActionDebounce = 0;
 
 
-// -----
+// --- LED timers en status ---
+unsigned long blink1Start = 0;
+unsigned long blink2Start = 0;
+unsigned long greenStart = 0;
+bool blinking1 = false;
+bool blinking2 = false;
+bool greenOn = false;
+
+
+// ----- code
 
 void setup() {
   Serial.begin(115200);
   dfSS.begin(9600);
   
-  pinMode(Volgende_knop, INPUT_PULLUP);
-  pinMode(Actie_knop, INPUT_PULLUP);
-
+  pinMode(Blauwe_knop, INPUT_PULLUP);
+  pinMode(Orange_knop, INPUT_PULLUP);
+  
+  pinMode(led1, OUTPUT);
+  pinMode(led2, OUTPUT);
+  pinMode(ledGreen, OUTPUT);
+  digitalWrite(led1, HIGH);
+  digitalWrite(led2, HIGH);
+  digitalWrite(ledGreen, LOW);
+  
   tft.begin(LCD_ILI9341, FLAGS_NONE, 40000000, TFT_CS, TFT_DC, TFT_RST, TFT_LED, TFT_MISO, TFT_MOSI, TFT_CLK);
   tft.setRotation(LCD_ORIENTATION_90);
   tft.fillScreen(TFT_BLACK);
@@ -92,16 +115,23 @@ void setup() {
 
 void loop() {
   if (Taak_gedaan) return;
+  unsigned long now = millis();
 
-  // --- Optie 1: Ga door naar de volgende taak ---
+  // --- Optie 1: Ga door naar de volgende taak (blauwe knop + blauwe LED knipperen + groene LED) ---
   if (isButtonPressed(Volgende_knop, nextState, lastNextState, lastNextDebounce)) { // Deze code werd gegenereerd door AI (gemini)
     Huidige_taak++;                                                                 // |||||||||||||||||||||||||||||||||||||||||||
     Wordt_actie_getoond = false;                                                    // |||||||||||||||||||||||||||||||||||||||||||
     
+    blinking1 = true;
+    blink1Start = now;
+    greenOn = true;
+    greenStart = now;
+    digitalWrite(ledGreen, HIGH);
+
     if (Huidige_taak < GIF_COUNT) {
       Serial.printf("Naar taak %d\n", Huidige_taak + 1);
       tft.fillScreen(TFT_BLACK);
-      loadGif(Huidige_taak);
+      loadtaakGif(Huidige_taak);
     } else {
       Serial.println("Taak is gedaan");
       tft.fillScreen(TFT_BLACK);
@@ -109,21 +139,51 @@ void loop() {
     }
   }
 
-  // --- Optie 2: Geef extra instructies/extra motivatie ---
-  if (!Taak_gedaan && isButtonPressed(Actie_knop, actionState, lastActionState, lastActionDebounce)) { // Deze code werd gegenereerd door AI (gemini)
+  // --- Optie 2: Geef extra instructies (oranje knop + oranje LED) ---
+  if (!Taak_gedaan && isButtonPressed(Orange_knop, actionState, lastActionState, lastActionDebounce)) { // Deze code werd gegenereerd door AI (gemini)
     if (!Wordt_actie_getoond) {                                                                        // |||||||||||||||||||||||||||||||||||||||||||
       Serial.println("Kindje wil extra hulp");                                                         // |||||||||||||||||||||||||||||||||||||||||||
       Wordt_actie_getoond = true;                                                                      // |||||||||||||||||||||||||||||||||||||||||||
       
+      blinking2 = true;
+      blink2Start = now;
+
       myDFPlayer.play(1); // Speel geluidje
       
       tft.fillScreen(TFT_BLACK);
-      showActionImage(); // Hint wordt getoond 
+      loadHintGif(Huidige_taak); // Hint wordt getoond 
+    }
+  }
+
+if (blinking1) {
+    if (now - blink1Start < 3000) {
+      if ((now / 200) % 2 == 0) digitalWrite(led1, HIGH);
+      else digitalWrite(led1, LOW);
+    } else {
+      blinking1 = false;
+      digitalWrite(led1, HIGH);
+    }
+  }
+
+if (blinking2) {
+    if (now - blink2Start < 3000) {
+      if ((now / 200) % 2 == 0) digitalWrite(led2, HIGH);
+      else digitalWrite(led2, LOW);
+    } else {
+      blinking2 = false;
+      digitalWrite(led2, HIGH);
+    }
+  }
+
+  if (greenOn) {
+    if (now - greenStart >= 2000) {
+      greenOn = false;
+      digitalWrite(ledGreen, LOW);
     }
   }
 
   // --- Rendering ---
-  if (!Wordt_actie_getoond && !Taak_gedaan) {
+  if (!Taak_gedaan) {
     gif.playFrame(false, NULL); // Speel de GIF af
   }
 }
@@ -131,28 +191,23 @@ void loop() {
 
 // ------ Functie om een nieuwe GIF klaar te zetten ------
 
-void loadGif(int index) {
+void loadtaakGif(int index) {
   gif.close();
   gif.begin(GIF_PALETTE_RGB565_BE);
-  if (gif.open((uint8_t *)gifData[index], gifSizes[index], GIFDraw)) {
+  if (gif.open((uint8_t *)taakgifData[index], taakgifSizes[index], GIFDraw)) {
     gif.setDrawType(GIF_DRAW_COOKED);
     gif.allocFrameBuf(GIFAlloc);
   }
 }
 
-
-// ------ Functie om de statische actie-afbeelding te tonen ------
-
-void showActionImage() {
+void loadhintGif(int index) {
   gif.close();
   gif.begin(GIF_PALETTE_RGB565_BE);
-  if (gif.open((uint8_t *)???, sizeof(???), GIFDraw)) {
+  if (gif.open((uint8_t *)hintgifData[index], hintgifSizes[index], GIFDraw)) {
     gif.setDrawType(GIF_DRAW_COOKED);
     gif.allocFrameBuf(GIFAlloc);
-    gif.playFrame(false, NULL);
   }
 }
-
 
 // ------ knop-checker ------
 // Deze code werd gegenereerd door AI (gemini)
