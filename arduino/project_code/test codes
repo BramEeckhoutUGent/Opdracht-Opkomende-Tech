@@ -220,3 +220,85 @@ void loop() {
     digitalWrite(led2, HIGH); // terug constant aan
   }
 }
+
+code zonder delay groen werkt nog niet:
+
+const int led1 = 17;
+const int led2 = 18;
+const int ledGreen = 16;
+
+const int button1 = 4;  // blauwe knop
+const int button2 = 5;
+
+// Timers
+unsigned long blink1Start = 0;
+unsigned long blink2Start = 0;
+unsigned long greenStart = 0;
+
+// Status flags
+bool blinking1 = false;
+bool blinking2 = false;
+bool greenOn = false;
+
+void setup() {
+  pinMode(led1, OUTPUT);
+  pinMode(led2, OUTPUT);
+  pinMode(ledGreen, OUTPUT);
+
+  pinMode(button1, INPUT_PULLUP);
+  pinMode(button2, INPUT_PULLUP);
+
+  digitalWrite(led1, HIGH);
+  digitalWrite(led2, HIGH);
+  digitalWrite(ledGreen, LOW);
+}
+
+void loop() {
+  unsigned long now = millis();
+
+  // --- Knop 1 (blauw) ---
+  if (digitalRead(button1) == LOW) {
+    blinking1 = true;
+    blink1Start = now;
+
+    greenOn = true;
+    greenStart = now;
+    digitalWrite(ledGreen, HIGH);
+  }
+
+  // --- Knop 2 ---
+  if (digitalRead(button2) == LOW) {
+    blinking2 = true;
+    blink2Start = now;
+  }
+
+  // --- LED1 knipperen 3 sec ---
+  if (blinking1) {
+    if (now - blink1Start < 3000) {
+      if ((now / 200) % 2 == 0) digitalWrite(led1, HIGH);
+      else digitalWrite(led1, LOW);
+    } else {
+      blinking1 = false;
+      digitalWrite(led1, HIGH);
+    }
+  }
+
+  // --- LED2 knipperen 3 sec ---
+  if (blinking2) {
+    if (now - blink2Start < 3000) {
+      if ((now / 200) % 2 == 0) digitalWrite(led2, HIGH);
+      else digitalWrite(led2, LOW);
+    } else {
+      blinking2 = false;
+      digitalWrite(led2, HIGH);
+    }
+  }
+
+  // --- Groen LED 2 sec aan ---
+  if (greenOn) {
+    if (now - greenStart >= 2000) {
+      greenOn = false;
+      digitalWrite(ledGreen, LOW);
+    }
+  }
+}
