@@ -80,3 +80,95 @@ void loop() {
     }
   }
 }
+
+// ===== PINNEN =====
+const int knop1 = 4;
+const int knop2 = 5;
+
+const int led1 = 17;
+const int led2 = 18;
+
+// ===== VARIABELEN =====
+bool blinking = false;
+
+int blinkLed = 0;
+
+unsigned long blinkStart = 0;
+unsigned long vorigeBlink = 0;
+
+bool blinkState = false;
+
+void setup() {
+
+  pinMode(knop1, INPUT);
+  pinMode(knop2, INPUT);
+
+  pinMode(led1, OUTPUT);
+  pinMode(led2, OUTPUT);
+
+  // Beide LEDs standaard aan
+  digitalWrite(led1, HIGH);
+  digitalWrite(led2, HIGH);
+}
+
+void loop() {
+
+  // Lees knoppen
+  int k1 = digitalRead(knop1);
+  int k2 = digitalRead(knop2);
+
+  // ===== KNOP 1 =====
+  // Als knop 1 ingedrukt wordt:
+  // LED2 knippert 5 sec
+  if (k1 == HIGH && !blinking) {
+
+    blinking = true;
+
+    blinkLed = led2;
+
+    blinkStart = millis();
+
+    vorigeBlink = millis();
+  }
+
+  // ===== KNOP 2 =====
+  // Als knop 2 ingedrukt wordt:
+  // LED1 knippert 5 sec
+  if (k2 == HIGH && !blinking) {
+
+    blinking = true;
+
+    blinkLed = led1;
+
+    blinkStart = millis();
+
+    vorigeBlink = millis();
+  }
+
+  // ===== KNIPPERLOGICA =====
+  if (blinking) {
+
+    // 5 seconden voorbij?
+    if (millis() - blinkStart >= 5000) {
+
+      blinking = false;
+
+      // LEDs terug constant aan
+      digitalWrite(led1, HIGH);
+      digitalWrite(led2, HIGH);
+    }
+
+    else {
+
+      // Elke 300 ms wisselen
+      if (millis() - vorigeBlink >= 300) {
+
+        vorigeBlink = millis();
+
+        blinkState = !blinkState;
+
+        digitalWrite(blinkLed, blinkState);
+      }
+    }
+  }
+}
