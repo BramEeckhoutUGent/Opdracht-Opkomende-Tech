@@ -5,7 +5,6 @@
 
 
 // ------ Installeren van libraries ------
-
 #include "esp_flash.h"
 #include "esp_partition.h"
 #include <bb_spi_lcd.h>
@@ -15,7 +14,6 @@
 
 
 // ------ GIF bestanden ------
-
 #include "gif_files/JasjePixel.h" // Dit is de gif voor deze taak
 #define GifData JasjePixel // Dit stuurt de GIF naar het scherm
 
@@ -39,12 +37,12 @@
 #define Orange_knop 15
 
 // --- LED's ---
-#define led1 2 
-#define led2 3
-#define ledGreen 4
+#define Blauwe_led 2 
+#define Orange_led 3
+#define Groene_led 4
 
 
-// ------ Start code -------
+// ------ Definieer variabelen -------
 // --- Objecten ---
 BB_SPI_LCD tft;
 SoftwareSerial dfSS(DF_RX, DF_TX);
@@ -52,7 +50,7 @@ DFRobotDFPlayerMini myDFPlayer;
 AnimatedGIF gif;
 
 // --- Status managment ---
-// Deze code werd gegenereerd door AI (gemini)
+// [!] Deze code werd gegenereerd door AI (gemini)
 int Huidige_taak = 0;
 bool Wordt_actie_getoond = false; // Zijn we momenteel de actie-afbeelding aan het tonen?
 bool Taak_gedaan = false;
@@ -66,26 +64,23 @@ const size_t taakgifSizes[GIF_COUNT] = {sizeof(gif1), sizeof(gif2), sizeof(gif3)
 const uint8_t* hintgifData[GIF_COUNT] = {gif1, gif2, gif3};
 const size_t hintgifSizes[GIF_COUNT] = {sizeof(gif1), sizeof(gif2), sizeof(gif3)};
 
-
 // --- Debounce variabelen ---
-// Deze code werd gegenereerd door AI (gemini)
+// [!] Deze code werd gegenereerd door AI (gemini)
 int lastNextState = -1, nextState = -1;
 unsigned long lastNextDebounce = 0;
 int lastActionState = -1, actionState = -1;
 unsigned long lastActionDebounce = 0;
 
-
 // --- LED timers en status ---
-unsigned long blink1Start = 0;
-unsigned long blink2Start = 0;
-unsigned long greenStart = 0;
-bool blinking1 = false;
-bool blinking2 = false;
-bool greenOn = false;
+unsigned long Knipper_Blauw_Start = 0;
+unsigned long Knipper_Orange_Start = 0;
+unsigned long Groen_Start = 0;
+bool Knipper_Blauw_On = false;
+bool Knipper_Orange_On = false;
+bool Groen_On = false;
 
 
-// ----- code
-
+// ------ Start Code ------
 void setup() {
   Serial.begin(115200);
   dfSS.begin(9600);
@@ -93,12 +88,12 @@ void setup() {
   pinMode(Blauwe_knop, INPUT_PULLUP);
   pinMode(Orange_knop, INPUT_PULLUP);
   
-  pinMode(led1, OUTPUT);
-  pinMode(led2, OUTPUT);
-  pinMode(ledGreen, OUTPUT);
-  digitalWrite(led1, HIGH);
-  digitalWrite(led2, HIGH);
-  digitalWrite(ledGreen, LOW);
+  pinMode(Blauwe_led, OUTPUT);
+  pinMode(Orange_led, OUTPUT);
+  pinMode(Groene_led, OUTPUT);
+  digitalWrite(Blauwe_led, HIGH);
+  digitalWrite(Orange_led, HIGH);
+  digitalWrite(Groene_led, LOW);
   
   tft.begin(LCD_ILI9341, FLAGS_NONE, 40000000, TFT_CS, TFT_DC, TFT_RST, TFT_LED, TFT_MISO, TFT_MOSI, TFT_CLK);
   tft.setRotation(LCD_ORIENTATION_90);
@@ -110,23 +105,23 @@ void setup() {
     myDFPlayer.volume(20); // Geluid van 0 tot 30
   }
 
-  loadGif(Huidige_taak); // Dit toont de eerste taak op het scherm
+  loadtaakGif(Huidige_taak); // Dit toont de eerste taak op het scherm
 }
 
 void loop() {
   if (Taak_gedaan) return;
-  unsigned long now = millis();
+  unsigned long nu = millis();
 
   // --- Optie 1: Ga door naar de volgende taak (blauwe knop + blauwe LED knipperen + groene LED) ---
   if (isButtonPressed(Volgende_knop, nextState, lastNextState, lastNextDebounce)) { // Deze code werd gegenereerd door AI (gemini)
     Huidige_taak++;                                                                 // |||||||||||||||||||||||||||||||||||||||||||
     Wordt_actie_getoond = false;                                                    // |||||||||||||||||||||||||||||||||||||||||||
     
-    blinking1 = true;
-    blink1Start = now;
-    greenOn = true;
-    greenStart = now;
-    digitalWrite(ledGreen, HIGH);
+    Knipper_Blauw_On = true;
+    Knipper_Blauw_Start = nu;
+    Groen_On = true;
+    Groen_Start = nu;
+    digitalWrite(Groene_led, HIGH);
 
     if (Huidige_taak < GIF_COUNT) {
       Serial.printf("Naar taak %d\n", Huidige_taak + 1);
@@ -145,40 +140,40 @@ void loop() {
       Serial.println("Kindje wil extra hulp");                                                         // |||||||||||||||||||||||||||||||||||||||||||
       Wordt_actie_getoond = true;                                                                      // |||||||||||||||||||||||||||||||||||||||||||
       
-      blinking2 = true;
-      blink2Start = now;
+      Knipper_Orange_On = true;
+      Knipper_Orange_Start = nu;
 
       myDFPlayer.play(1); // Speel geluidje
       
       tft.fillScreen(TFT_BLACK);
-      loadHintGif(Huidige_taak); // Hint wordt getoond 
+      loadhintGif(Huidige_taak); // Hint wordt getoond 
     }
   }
 
 if (blinking1) {
-    if (now - blink1Start < 3000) {
-      if ((now / 200) % 2 == 0) digitalWrite(led1, HIGH);
-      else digitalWrite(led1, LOW);
+    if (nu - blink1Start < 3000) {
+      if ((nu / 200) % 2 == 0) digitalWrite(Blauwe_led, HIGH);
+      else digitalWrite(Blauwe_led, LOW);
     } else {
       blinking1 = false;
-      digitalWrite(led1, HIGH);
+      digitalWrite(Blauwe_led, HIGH);
     }
   }
 
 if (blinking2) {
-    if (now - blink2Start < 3000) {
-      if ((now / 200) % 2 == 0) digitalWrite(led2, HIGH);
-      else digitalWrite(led2, LOW);
+    if (nu - blink2Start < 3000) {
+      if ((nu / 200) % 2 == 0) digitalWrite(Orange_led, HIGH);
+      else digitalWrite(Orange_led, LOW);
     } else {
       blinking2 = false;
-      digitalWrite(led2, HIGH);
+      digitalWrite(Orange_led, HIGH);
     }
   }
 
-  if (greenOn) {
-    if (now - greenStart >= 2000) {
-      greenOn = false;
-      digitalWrite(ledGreen, LOW);
+  if (groenOn) {
+    if (nu - groenStart >= 2000) {
+      groenOn = false;
+      digitalWrite(Groene_led, LOW);
     }
   }
 
@@ -190,7 +185,6 @@ if (blinking2) {
 
 
 // ------ Functie om een nieuwe GIF klaar te zetten ------
-
 void loadtaakGif(int index) {
   gif.close();
   gif.begin(GIF_PALETTE_RGB565_BE);
@@ -210,7 +204,7 @@ void loadhintGif(int index) {
 }
 
 // ------ knop-checker ------
-// Deze code werd gegenereerd door AI (gemini)
+// [!] Deze code werd gegenereerd door AI (gemini)
 bool isButtonPressed(int pin, int &state, int &lastState, unsigned long &lastDebounce) {
   int reading = digitalRead(pin);
   if (reading != lastState) lastDebounce = millis();
@@ -232,182 +226,4 @@ void GIFFree(void *p) { free(p); }
 void GIFDraw(GIFDRAW *pDraw) {
   if (pDraw->y == 0) tft.setAddrWindow(pDraw->iX, pDraw->iY, pDraw->iWidth, pDraw->iHeight);
   tft.pushPixels((uint16_t *)pDraw->pPixels, pDraw->iWidth);
-}
-
-
-// ------ TEST -------
-# wanneer knop ingedrukt wordt speelt bevestigings geluid af en begint 
-het lampje van de knop te pinken totdat er een volgende actie wordt geactiveert 
-om naar de volgende stap te gaan, standaard branden de ledlichtjes dus
-
-het groene lichtje op de neus moet oplichten wanneer er hij op het blauwe licht heeft gedrukt en dus de actie voltooid heeft
-
-dus na actie, kiest hij voor hint (oranje lichtje knippert totdat blauw lichtje ingedrukt wordt) of voor volgende stap (groen lichtje brand kort)
-
-// TEST: Interactie knoppen + LED feedback
-
-// ------ INPUTS (knoppen) ------
-const int buttonBlue = 16;     // blauwe knop (rechter oor)
-const int buttonOrange = 15;   // gele/oranje knop (linker oor)
-
-// ------ OUTPUTS (LEDs) ------
-const int ledBlue = 4;         // blauwe LED
-const int ledGreen = 5;        // groene LED (neus)
-const int ledOrange = 6;       // gele/oranje LED
-void setup() {
-  Serial.begin(115200);
-
-  pinMode(buttonBlue, INPUT_PULLUP);
-  pinMode(buttonOrange, INPUT_PULLUP);
-
-  pinMode(ledBlue, OUTPUT);
-  pinMode(ledGreen, OUTPUT);
-  pinMode(ledOrange, OUTPUT);
-
-  // standaard toestand
-  digitalWrite(ledBlue, HIGH);
-  digitalWrite(ledOrange, HIGH);
-  digitalWrite(ledGreen, LOW);
-}
-
-void loop() {
-
-  // blauwe knop = bevestigen
-  if (digitalRead(buttonBlue) == LOW) {
-    Serial.println("Stap bevestigd");
-
-    // groene LED = feedback
-    digitalWrite(ledGreen, HIGH);
-    delay(500);
-    digitalWrite(ledGreen, LOW);
-
-    Serial.println("Ga naar volgende stap");
-    delay(500);
-  }
-
-  // oranje knop = hint
-  if (digitalRead(buttonOrange) == LOW) {
-    Serial.println("Hint gevraagd");
-
-    // knipperende LED
-    for (int i = 0; i < 6; i++) {
-      digitalWrite(ledOrange, HIGH);
-      delay(300);
-      digitalWrite(ledOrange, LOW);
-      delay(300);
-    }
-
-    Serial.println("Herhaal instructie");
-  }
-}
-if (digitalRead(buttonBlue) == LOW) {
-  Serial.println("Stap bevestigd");
-
-  // Bevestigingsgeluid afspelen
-  myDFPlayer.play(2);   // bv. 002.mp3 = confirm sound => juiste sound moet nog opgeslagen worden op sd kaartje
-
-  // Groene LED (neus)
-  digitalWrite(ledGreen, HIGH);
-  delay(500);
-  digitalWrite(ledGreen, LOW);
-
-  // Volgende stap laden (GIF)
-  tft.fillScreen(TFT_BLACK);
-  showNextStep();  // moet nog gekoppeld worden aan juiste functie
-
-  delay(300); // kleine buffer
-}
-
-testje:
-void setup() {
-  pinMode(2, OUTPUT);
-}
-
-void loop() {
-  digitalWrite(2, HIGH);
-  delay(100);
-  digitalWrite(2, LOW);
-  delay(100);
-}
-
-FINAL:
-werkende code met groen bevestigingslicht bij indrukken blauw en flikkerende blauwe en gele lichtjes:
-const int led1 = 17;
-const int led2 = 18;
-const int ledGreen = 8;
-
-const int button1 = 4;  // blauwe knop
-const int button2 = 5;
-
-// Timers
-unsigned long blink1Start = 0;
-unsigned long blink2Start = 0;
-unsigned long greenStart = 0;
-
-// Status flags
-bool blinking1 = false;
-bool blinking2 = false;
-bool greenOn = false;
-
-void setup() {
-  pinMode(led1, OUTPUT);
-  pinMode(led2, OUTPUT);
-  pinMode(ledGreen, OUTPUT);
-
-  pinMode(button1, INPUT_PULLUP);
-  pinMode(button2, INPUT_PULLUP);
-
-  digitalWrite(led1, HIGH);
-  digitalWrite(led2, HIGH);
-  digitalWrite(ledGreen, LOW);
-}
-
-void loop() {
-  unsigned long now = millis();
-
-  // --- Knop 1 (blauw) ---
-  if (digitalRead(button1) == LOW) {
-    blinking1 = true;
-    blink1Start = now;
-
-    greenOn = true;
-    greenStart = now;
-    digitalWrite(ledGreen, HIGH);
-  }
-
-  // --- Knop 2 ---
-  if (digitalRead(button2) == LOW) {
-    blinking2 = true;
-    blink2Start = now;
-  }
-
-  // --- LED1 knipperen 3 sec ---
-  if (blinking1) {
-    if (now - blink1Start < 3000) {
-      if ((now / 200) % 2 == 0) digitalWrite(led1, HIGH);
-      else digitalWrite(led1, LOW);
-    } else {
-      blinking1 = false;
-      digitalWrite(led1, HIGH);
-    }
-  }
-
-  // --- LED2 knipperen 3 sec ---
-  if (blinking2) {
-    if (now - blink2Start < 3000) {
-      if ((now / 200) % 2 == 0) digitalWrite(led2, HIGH);
-      else digitalWrite(led2, LOW);
-    } else {
-      blinking2 = false;
-      digitalWrite(led2, HIGH);
-    }
-  }
-
-  // --- Groen LED 2 sec aan ---
-  if (greenOn) {
-    if (now - greenStart >= 2000) {
-      greenOn = false;
-      digitalWrite(ledGreen, LOW);
-    }
-  }
 }

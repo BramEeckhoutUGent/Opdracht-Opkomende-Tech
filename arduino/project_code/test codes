@@ -421,3 +421,185 @@ void loop() {
 
  
    }
+
+
+
+
+
+
+// ------ TEST -------
+# wanneer knop ingedrukt wordt speelt bevestigings geluid af en begint 
+het lampje van de knop te pinken totdat er een volgende actie wordt geactiveert 
+om naar de volgende stap te gaan, standaard branden de ledlichtjes dus
+
+het groene lichtje op de neus moet oplichten wanneer er hij op het blauwe licht heeft gedrukt en dus de actie voltooid heeft
+
+dus na actie, kiest hij voor hint (oranje lichtje knippert totdat blauw lichtje ingedrukt wordt) of voor volgende stap (groen lichtje brand kort)
+
+// TEST: Interactie knoppen + LED feedback
+
+// ------ INPUTS (knoppen) ------
+const int buttonBlue = 16;     // blauwe knop (rechter oor)
+const int buttonOrange = 15;   // gele/oranje knop (linker oor)
+
+// ------ OUTPUTS (LEDs) ------
+const int ledBlue = 4;         // blauwe LED
+const int ledGreen = 5;        // groene LED (neus)
+const int ledOrange = 6;       // gele/oranje LED
+void setup() {
+  Serial.begin(115200);
+
+  pinMode(buttonBlue, INPUT_PULLUP);
+  pinMode(buttonOrange, INPUT_PULLUP);
+
+  pinMode(ledBlue, OUTPUT);
+  pinMode(ledGreen, OUTPUT);
+  pinMode(ledOrange, OUTPUT);
+
+  // standaard toestand
+  digitalWrite(ledBlue, HIGH);
+  digitalWrite(ledOrange, HIGH);
+  digitalWrite(ledGreen, LOW);
+}
+
+void loop() {
+
+  // blauwe knop = bevestigen
+  if (digitalRead(buttonBlue) == LOW) {
+    Serial.println("Stap bevestigd");
+
+    // groene LED = feedback
+    digitalWrite(ledGreen, HIGH);
+    delay(500);
+    digitalWrite(ledGreen, LOW);
+
+    Serial.println("Ga naar volgende stap");
+    delay(500);
+  }
+
+  // oranje knop = hint
+  if (digitalRead(buttonOrange) == LOW) {
+    Serial.println("Hint gevraagd");
+
+    // knipperende LED
+    for (int i = 0; i < 6; i++) {
+      digitalWrite(ledOrange, HIGH);
+      delay(300);
+      digitalWrite(ledOrange, LOW);
+      delay(300);
+    }
+
+    Serial.println("Herhaal instructie");
+  }
+}
+if (digitalRead(buttonBlue) == LOW) {
+  Serial.println("Stap bevestigd");
+
+  // Bevestigingsgeluid afspelen
+  myDFPlayer.play(2);   // bv. 002.mp3 = confirm sound => juiste sound moet nog opgeslagen worden op sd kaartje
+
+  // Groene LED (neus)
+  digitalWrite(ledGreen, HIGH);
+  delay(500);
+  digitalWrite(ledGreen, LOW);
+
+  // Volgende stap laden (GIF)
+  tft.fillScreen(TFT_BLACK);
+  showNextStep();  // moet nog gekoppeld worden aan juiste functie
+
+  delay(300); // kleine buffer
+}
+
+testje:
+void setup() {
+  pinMode(2, OUTPUT);
+}
+
+void loop() {
+  digitalWrite(2, HIGH);
+  delay(100);
+  digitalWrite(2, LOW);
+  delay(100);
+}
+
+FINAL:
+werkende code met groen bevestigingslicht bij indrukken blauw en flikkerende blauwe en gele lichtjes:
+const int led1 = 17;
+const int led2 = 18;
+const int ledGreen = 8;
+
+const int button1 = 4;  // blauwe knop
+const int button2 = 5;
+
+// Timers
+unsigned long blink1Start = 0;
+unsigned long blink2Start = 0;
+unsigned long greenStart = 0;
+
+// Status flags
+bool blinking1 = false;
+bool blinking2 = false;
+bool greenOn = false;
+
+void setup() {
+  pinMode(led1, OUTPUT);
+  pinMode(led2, OUTPUT);
+  pinMode(ledGreen, OUTPUT);
+
+  pinMode(button1, INPUT_PULLUP);
+  pinMode(button2, INPUT_PULLUP);
+
+  digitalWrite(led1, HIGH);
+  digitalWrite(led2, HIGH);
+  digitalWrite(ledGreen, LOW);
+}
+
+void loop() {
+  unsigned long now = millis();
+
+  // --- Knop 1 (blauw) ---
+  if (digitalRead(button1) == LOW) {
+    blinking1 = true;
+    blink1Start = now;
+
+    greenOn = true;
+    greenStart = now;
+    digitalWrite(ledGreen, HIGH);
+  }
+
+  // --- Knop 2 ---
+  if (digitalRead(button2) == LOW) {
+    blinking2 = true;
+    blink2Start = now;
+  }
+
+  // --- LED1 knipperen 3 sec ---
+  if (blinking1) {
+    if (now - blink1Start < 3000) {
+      if ((now / 200) % 2 == 0) digitalWrite(led1, HIGH);
+      else digitalWrite(led1, LOW);
+    } else {
+      blinking1 = false;
+      digitalWrite(led1, HIGH);
+    }
+  }
+
+  // --- LED2 knipperen 3 sec ---
+  if (blinking2) {
+    if (now - blink2Start < 3000) {
+      if ((now / 200) % 2 == 0) digitalWrite(led2, HIGH);
+      else digitalWrite(led2, LOW);
+    } else {
+      blinking2 = false;
+      digitalWrite(led2, HIGH);
+    }
+  }
+
+  // --- Groen LED 2 sec aan ---
+  if (greenOn) {
+    if (now - greenStart >= 2000) {
+      greenOn = false;
+      digitalWrite(ledGreen, LOW);
+    }
+  }
+}
