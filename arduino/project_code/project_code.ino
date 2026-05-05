@@ -14,8 +14,21 @@
 
 
 // ------ GIF bestanden ------
-#include "gif_files/JasjePixel.h" // Dit is de gif voor deze taak
-#define GifData JasjePixel // Dit stuurt de GIF naar het scherm
+// --- Taakjes ---
+#include "gif_files/Taak_1_Opruimen.h"
+#include "gif_files/Taak_2_Tandenpoetsen.h"
+#include "gif_files/Taak_3_Jasje.h"
+#define GifData Taak_1_Opruimen
+#define GifData Taak_2_Tandenpoetsen
+#define GifData Taak_3_Jasje
+
+// --- Hints ---
+#include "gif_files/Hint_1.h"
+#include "gif_files/Hint_2.h"
+#include "gif_files/Hint_3.h"
+#define GifData Hint_1
+#define GifData Hint_2
+#define GifData Hint_3
 
 
 // ------ Definieer pinnen -------
@@ -57,12 +70,12 @@ bool Taak_gedaan = false;
 
 // --- GIF data voor de taakjes ---
 #define GIF_COUNT 3
-const uint8_t* taakgifData[GIF_COUNT] = {gif1, gif2, gif3};
-const size_t taakgifSizes[GIF_COUNT] = {sizeof(gif1), sizeof(gif2), sizeof(gif3)};
+const uint8_t* taakgifData[GIF_COUNT] = {Taak_1_Opruimen, Taak_2_Tandenpoetsen, Taak_3_Jasje};
+const size_t taakgifSizes[GIF_COUNT] = {sizeof(Taak_1_Opruimen), sizeof(Taak_2_Tandenpoetsen), sizeof(Taak_3_Jasje)};
 
 // --- GIF data voor de hints ---
-const uint8_t* hintgifData[GIF_COUNT] = {gif1, gif2, gif3};
-const size_t hintgifSizes[GIF_COUNT] = {sizeof(gif1), sizeof(gif2), sizeof(gif3)};
+const uint8_t* hintgifData[GIF_COUNT] = {Hint_1, Hint_2, Hint_3};
+const size_t hintgifSizes[GIF_COUNT] = {sizeof(Hint_1), sizeof(Hint_2), sizeof(Hint_3)};
 
 // --- Debounce variabelen ---
 // [!] Deze code werd gegenereerd door AI (gemini)
