@@ -113,7 +113,7 @@ void loop() {
   unsigned long nu = millis();
 
   // --- Optie 1: Ga door naar de volgende taak (blauwe knop + blauwe LED knipperen + groene LED) ---
-  if (isButtonPressed(Volgende_knop, nextState, lastNextState, lastNextDebounce)) { // Deze code werd gegenereerd door AI (gemini)
+  if (isButtonPressed(Blauwe_knop, nextState, lastNextState, lastNextDebounce)) { // Deze code werd gegenereerd door AI (gemini)
     Huidige_taak++;                                                                 // |||||||||||||||||||||||||||||||||||||||||||
     Wordt_actie_getoond = false;                                                    // |||||||||||||||||||||||||||||||||||||||||||
     
@@ -150,29 +150,29 @@ void loop() {
     }
   }
 
-if (blinking1) {
-    if (nu - blink1Start < 3000) {
+if (Knipper_Blauw_On) {
+    if (nu - Knipper_Blauw_Start < 3000) {
       if ((nu / 200) % 2 == 0) digitalWrite(Blauwe_led, HIGH);
       else digitalWrite(Blauwe_led, LOW);
     } else {
-      blinking1 = false;
+      Knipper_Blauw_On = false;
       digitalWrite(Blauwe_led, HIGH);
     }
   }
 
-if (blinking2) {
-    if (nu - blink2Start < 3000) {
+if (Knipper_Orange_On) {
+    if (nu - Knipper_Orange_Start < 3000) {
       if ((nu / 200) % 2 == 0) digitalWrite(Orange_led, HIGH);
       else digitalWrite(Orange_led, LOW);
     } else {
-      blinking2 = false;
+      Knipper_Orange_On = false;
       digitalWrite(Orange_led, HIGH);
     }
   }
 
-  if (groenOn) {
-    if (nu - groenStart >= 2000) {
-      groenOn = false;
+  if (Groen_On) {
+    if (nu - Groen_Start >= 2000) {
+      Groen_On = false;
       digitalWrite(Groene_led, LOW);
     }
   }
