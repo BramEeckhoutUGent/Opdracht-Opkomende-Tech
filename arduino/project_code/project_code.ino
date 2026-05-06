@@ -23,12 +23,12 @@
 #define GifData Taak_3_Jasje
 
 // --- Hints ---
-#include "gif_files/Hint_1.h"
-#include "gif_files/Hint_2.h"
-#include "gif_files/Hint_3.h"
-#define GifData Hint_1
-#define GifData Hint_2
-#define GifData Hint_3
+#include "gif_files/Hint_1_Opruimen.h"
+#include "gif_files/Hint_2_Tandenpoetsen.h"
+#include "gif_files/Hint_3_Jasje.h"
+#define GifData Hint_1_Opruimen
+#define GifData Hint_2_Tandenpoetsen
+#define GifData Hint_3_Jasje
 
 
 // ------ Definieer pinnen -------
@@ -42,17 +42,17 @@
 #define TFT_CLK   12
 
 // --- DFPlayer Mini ---
-#define DF_RX 18 
-#define DF_TX 17
+#define DF_RX 18 // verbind met TX van de DFPlayer mini
+#define DF_TX 17 // verbind met RX van de DFPlayer mini + 1k weerstand
 
 // --- Drukknoppen ---
 #define Blauwe_knop 16
 #define Orange_knop 15
 
 // --- LED's ---
-#define Blauwe_led 2 
-#define Orange_led 3
-#define Groene_led 4
+#define Blauwe_led 4 
+#define Orange_led 6
+#define Groene_led 5
 
 
 // ------ Definieer variabelen -------
@@ -74,8 +74,8 @@ const uint8_t* taakgifData[GIF_COUNT] = {Taak_1_Opruimen, Taak_2_Tandenpoetsen, 
 const size_t taakgifSizes[GIF_COUNT] = {sizeof(Taak_1_Opruimen), sizeof(Taak_2_Tandenpoetsen), sizeof(Taak_3_Jasje)};
 
 // --- GIF data voor de hints ---
-const uint8_t* hintgifData[GIF_COUNT] = {Hint_1, Hint_2, Hint_3};
-const size_t hintgifSizes[GIF_COUNT] = {sizeof(Hint_1), sizeof(Hint_2), sizeof(Hint_3)};
+const uint8_t* hintgifData[GIF_COUNT] = {Hint_1_Opruimen, Hint_2_Tandenpoetsen, Hint_3_Jasje};
+const size_t hintgifSizes[GIF_COUNT] = {sizeof(Hint_1_Opruimen), sizeof(Hint_2_Tandenpoetsen), sizeof(Hint_3_Jasje)};
 
 // --- Debounce variabelen ---
 // [!] Deze code werd gegenereerd door AI (gemini)
@@ -130,6 +130,8 @@ void loop() {
     Huidige_taak++;                                                                 // |||||||||||||||||||||||||||||||||||||||||||
     Wordt_actie_getoond = false;                                                    // |||||||||||||||||||||||||||||||||||||||||||
     
+    myDFPlayer.play(1);
+
     Knipper_Blauw_On = true;
     Knipper_Blauw_Start = nu;
     Groen_On = true;
@@ -156,10 +158,10 @@ void loop() {
       Knipper_Orange_On = true;
       Knipper_Orange_Start = nu;
 
-      myDFPlayer.play(1); // Speel geluidje
+      myDFPlayer.play(Huidige_taak + 1);
       
       tft.fillScreen(TFT_BLACK);
-      loadhintGif(Huidige_taak); // Hint wordt getoond 
+      loadhintGif(Huidige_taak);
     }
   }
 
@@ -192,7 +194,7 @@ if (Knipper_Orange_On) {
 
   // --- Rendering ---
   if (!Taak_gedaan) {
-    gif.playFrame(false, NULL); // Speel de GIF af
+    gif.playFrame(false, NULL);
   }
 }
 
