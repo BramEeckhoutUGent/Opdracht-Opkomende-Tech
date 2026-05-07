@@ -166,11 +166,13 @@ void loop() {
       Knipper_Orange_Start = nu;
 
       myDFPlayer.play(Huidige_taak + 1);
+      delay(100); 
+      yield();
       
       tft.fillScreen(TFT_BLACK);
       loadhintGif(Huidige_taak);
+      return;
     }
-    return;
   }
 
 if (Knipper_Blauw_On) {
