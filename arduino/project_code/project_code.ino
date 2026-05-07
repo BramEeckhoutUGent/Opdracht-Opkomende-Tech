@@ -153,6 +153,7 @@ void loop() {
       tft.fillScreen(TFT_BLACK);
       Taak_gedaan = true;
     }
+    return;
   }
 
   // --- Optie 2: Geef extra instructies (oranje knop + oranje LED) ---
@@ -169,6 +170,7 @@ void loop() {
       tft.fillScreen(TFT_BLACK);
       loadhintGif(Huidige_taak);
     }
+    return;
   }
 
 if (Knipper_Blauw_On) {
@@ -200,18 +202,21 @@ if (Knipper_Orange_On) {
 
   // --- Rendering ---
   if (!Taak_gedaan) {
-    gif.playFrame(false, NULL);
+    if (gif.getCanvasWidth() > 0) {
+      gif.playFrame(false, NULL);
+    }
   }
 }
 
 
 // ------ Functie om een nieuwe GIF klaar te zetten ------
 void loadtaakGif(int index) {
+  Serial.println("Vrijmaken geheugen...");
   gif.close();
   gif.freeFrameBuf(GIFFree);
-  tft.fillScreen(0);
-  delay(50); 
+  delay(100); 
   yield();
+  Serial.printf("PSRAM vrij voor start: %d bytes\n", ESP.getFreePsram());
   gif.begin(GIF_PALETTE_RGB565_BE);
   if (gif.open((uint8_t *)taakgifData[index], taakgifSizes[index], GIFDraw)) {
     gif.setDrawType(GIF_DRAW_COOKED);
@@ -224,11 +229,12 @@ void loadtaakGif(int index) {
 }
 
 void loadhintGif(int index) {
+  Serial.println("Vrijmaken geheugen...");
   gif.close();
   gif.freeFrameBuf(GIFFree);
-  tft.fillScreen(0);
-  delay(50); 
+  delay(100); 
   yield();
+  Serial.printf("PSRAM vrij voor start: %d bytes\n", ESP.getFreePsram());
   gif.begin(GIF_PALETTE_RGB565_BE);
   if (gif.open((uint8_t *)hintgifData[index], hintgifSizes[index], GIFDraw)) {
     gif.setDrawType(GIF_DRAW_COOKED);
