@@ -13,6 +13,8 @@ Volgende stap (blauw lichtje in het oortje): wanneer deze knop wordt ingedrukt, 
 
 Op deze manier combineert de beer eenvoudige interactie met duidelijke feedback, waardoor kinderen op een zelfstandige en motiverende manier routines kunnen aanleren.
 
+![alt text](<Afbeelding Planda beer.png>)
+
 ## Contributors
 - Bram Eeckhout
 - Doren Vermaut

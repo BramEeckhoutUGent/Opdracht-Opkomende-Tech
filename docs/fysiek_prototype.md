@@ -33,3 +33,5 @@ Ga naar Tools en selecteer de volgende gegevens:
 * Flash Size: "16MB (128Mb)
 * Partition Scheme: "16M Flash (3MB APP/9.9MB FATFS)"
 * PSRAM: "OPI PSRAM"
+
+![alt text](<Afbeelding Planda beer.png>)
