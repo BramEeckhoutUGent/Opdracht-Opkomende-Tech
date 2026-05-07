@@ -119,9 +119,6 @@ void setup() {
   digitalWrite(Orange_led, HIGH);
   digitalWrite(Groene_led, LOW);
   
-  tft.init();
-  tft.setRotation(1);
-  tft.setSwapBytes(true);
   tft.begin(LCD_ILI9341, FLAGS_NONE, 40000000, TFT_CS, TFT_DC, TFT_RST, TFT_LED, TFT_MISO, TFT_MOSI, TFT_CLK);
   tft.setRotation(LCD_ORIENTATION_90);
   tft.fillScreen(TFT_BLACK);
@@ -271,12 +268,16 @@ bool isButtonPressed(int pin, int &state, int &lastState, unsigned long &lastDeb
 void *GIFAlloc(uint32_t u32Size) { return heap_caps_malloc(u32Size, MALLOC_CAP_SPIRAM); }
 void GIFFree(void *p) { heap_caps_free(p); }
 void GIFDraw(GIFDRAW *pDraw) {
-  if (pDraw->y >= tft.height() || pDraw->iX >= tft.width()) return;
-  tft.pushImage(
-    pDraw->iX, 
-    pDraw->iY + pDraw->y, 
-    pDraw->iWidth, 
-    1, 
-    (uint16_t *)pDraw->pPixels
-  );
+  uint16_t *pPixels = (uint16_t *)pDraw->pPixels;
+  int iWidth = pDraw->iWidth;
+  int y = pDraw->iY + pDraw->y;
+
+  tft.setAddrWindow(pDraw->iX, y, iWidth, 1);
+
+  for (int x = 0; x < iWidth; x++) {
+    uint16_t c = pPixels[x];
+    pPixels[x] = (c >> 8) | (c << 8); 
+  }
+
+  tft.pushPixels(pPixels, iWidth);
 }
