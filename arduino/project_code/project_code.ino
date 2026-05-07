@@ -9,7 +9,6 @@
 #include "esp_partition.h"
 #include <bb_spi_lcd.h>
 #include <AnimatedGIF.h>
-#include "SoftwareSerial.h"
 #include "DFRobotDFPlayerMini.h"
 
 
@@ -58,7 +57,6 @@
 // ------ Definieer variabelen -------
 // --- Objecten ---
 BB_SPI_LCD tft;
-SoftwareSerial dfSS(DF_RX, DF_TX);
 DFRobotDFPlayerMini myDFPlayer;
 AnimatedGIF gif;
 
@@ -96,7 +94,14 @@ bool Groen_On = false;
 // ------ Start Code ------
 void setup() {
   Serial.begin(115200);
-  dfSS.begin(9600);
+  Serial2.begin(9600, SERIAL_8N1, 18, 17);
+  
+  if (!myDFPlayer.begin(Serial2)) {
+    Serial.println("DFPlayer error: Check verbinding en SD-kaart!");
+  } else {
+    Serial.println("DFPlayer online!");
+  }
+  myDFPlayer.volume(20);
 
   if (psramInit()) {
     Serial.println("PSRAM succesvol geïnitialiseerd!");
@@ -117,12 +122,6 @@ void setup() {
   tft.begin(LCD_ILI9341, FLAGS_NONE, 40000000, TFT_CS, TFT_DC, TFT_RST, TFT_LED, TFT_MISO, TFT_MOSI, TFT_CLK);
   tft.setRotation(LCD_ORIENTATION_90);
   tft.fillScreen(TFT_BLACK);
-
-  if (!myDFPlayer.begin(dfSS)) {
-    Serial.println("DFPlayer error");
-  } else {
-    myDFPlayer.volume(20); // Geluid van 0 tot 30
-  }
 
   loadtaakGif(Huidige_taak); // Dit toont de eerste taak op het scherm
 }
