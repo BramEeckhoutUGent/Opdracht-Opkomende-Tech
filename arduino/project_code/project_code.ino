@@ -119,6 +119,9 @@ void setup() {
   digitalWrite(Orange_led, HIGH);
   digitalWrite(Groene_led, LOW);
   
+  tft.init();
+  tft.setRotation(1);
+  tft.setSwapBytes(true);
   tft.begin(LCD_ILI9341, FLAGS_NONE, 40000000, TFT_CS, TFT_DC, TFT_RST, TFT_LED, TFT_MISO, TFT_MOSI, TFT_CLK);
   tft.setRotation(LCD_ORIENTATION_90);
   tft.fillScreen(TFT_BLACK);
@@ -218,9 +221,9 @@ void loadtaakGif(int index) {
   delay(100); 
   yield();
   Serial.printf("PSRAM vrij voor start: %d bytes\n", ESP.getFreePsram());
-  gif.begin(GIF_PALETTE_RGB565_BE);
+  gif.begin(GIF_PALETTE_RGB565);
   if (gif.open((uint8_t *)taakgifData[index], taakgifSizes[index], GIFDraw)) {
-    gif.setDrawType(GIF_DRAW_RAW);
+    gif.setDrawType(GIF_DRAW_COOKED);
     if (gif.allocFrameBuf(GIFAlloc) != GIF_SUCCESS) {
       Serial.println("PSRAM Allocatie mislukt!");
     } else {
@@ -236,7 +239,7 @@ void loadhintGif(int index) {
   delay(100); 
   yield();
   Serial.printf("PSRAM vrij voor start: %d bytes\n", ESP.getFreePsram());
-  gif.begin(GIF_PALETTE_RGB565_BE);
+  gif.begin(GIF_PALETTE_RGB565);
   if (gif.open((uint8_t *)hintgifData[index], hintgifSizes[index], GIFDraw)) {
     gif.setDrawType(GIF_DRAW_COOKED);
     if (gif.allocFrameBuf(GIFAlloc) != GIF_SUCCESS) {
@@ -268,19 +271,12 @@ bool isButtonPressed(int pin, int &state, int &lastState, unsigned long &lastDeb
 void *GIFAlloc(uint32_t u32Size) { return heap_caps_malloc(u32Size, MALLOC_CAP_SPIRAM); }
 void GIFFree(void *p) { heap_caps_free(p); }
 void GIFDraw(GIFDRAW *pDraw) {
-  uint8_t *s;
-  uint16_t *d, *pPal;
-  static uint16_t lineBuffer[320];
-
   if (pDraw->y >= tft.height() || pDraw->iX >= tft.width()) return;
-
-  s = pDraw->pPixels;
-  pPal = pDraw->pPalette;
-  
-  for (int x = 0; x < pDraw->iWidth; x++) {
-    uint16_t c = pPal[s[x]];
-    lineBuffer[x] = (c >> 8) | (c << 8); 
-  }
-
-  tft.pushImage(pDraw->iX, pDraw->iY + pDraw->y, pDraw->iWidth, 1, lineBuffer);
+  tft.pushImage(
+    pDraw->iX, 
+    pDraw->iY + pDraw->y, 
+    pDraw->iWidth, 
+    1, 
+    (uint16_t *)pDraw->pPixels
+  );
 }
