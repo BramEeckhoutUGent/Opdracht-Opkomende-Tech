@@ -220,7 +220,7 @@ void loadtaakGif(int index) {
   Serial.printf("PSRAM vrij voor start: %d bytes\n", ESP.getFreePsram());
   gif.begin(GIF_PALETTE_RGB565_BE);
   if (gif.open((uint8_t *)taakgifData[index], taakgifSizes[index], GIFDraw)) {
-    gif.setDrawType(GIF_DRAW_COOKED);
+    gif.setDrawType(GIF_DRAW_RAW);
     if (gif.allocFrameBuf(GIFAlloc) != GIF_SUCCESS) {
       Serial.println("PSRAM Allocatie mislukt!");
     } else {
@@ -268,12 +268,19 @@ bool isButtonPressed(int pin, int &state, int &lastState, unsigned long &lastDeb
 void *GIFAlloc(uint32_t u32Size) { return heap_caps_malloc(u32Size, MALLOC_CAP_SPIRAM); }
 void GIFFree(void *p) { heap_caps_free(p); }
 void GIFDraw(GIFDRAW *pDraw) {
-  if (pDraw->iY + pDraw->y >= tft.height() || pDraw->iX >= tft.width()) return;
-  tft.pushImage(
-    pDraw->iX,
-    pDraw->iY + pDraw->y,
-    pDraw->iWidth,
-    1,
-    (uint16_t *)pDraw->pPixels
-  );
+  uint8_t *s;
+  uint16_t *d, *pPal;
+  static uint16_t lineBuffer[320];
+
+  if (pDraw->y >= tft.height() || pDraw->iX >= tft.width()) return;
+
+  s = pDraw->pPixels;
+  pPal = pDraw->pPalette;
+  
+  for (int x = 0; x < pDraw->iWidth; x++) {
+    uint16_t c = pPal[s[x]];
+    lineBuffer[x] = (c >> 8) | (c << 8); 
+  }
+
+  tft.pushImage(pDraw->iX, pDraw->iY + pDraw->y, pDraw->iWidth, 1, lineBuffer);
 }
