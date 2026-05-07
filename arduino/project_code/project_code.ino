@@ -97,6 +97,12 @@ bool Groen_On = false;
 void setup() {
   Serial.begin(115200);
   dfSS.begin(9600);
+
+  if (psramInit()) {
+    Serial.println("PSRAM succesvol geïnitialiseerd!");
+  } else {
+    Serial.println("PSRAM niet gevonden!");
+  }
   
   pinMode(Blauwe_knop, INPUT_PULLUP);
   pinMode(Orange_knop, INPUT_PULLUP);
@@ -201,6 +207,7 @@ if (Knipper_Orange_On) {
 
 // ------ Functie om een nieuwe GIF klaar te zetten ------
 void loadtaakGif(int index) {
+  gif.freeFrameBuf(GIFFree);
   gif.close();
   gif.begin(GIF_PALETTE_RGB565_BE);
   if (gif.open((uint8_t *)taakgifData[index], taakgifSizes[index], GIFDraw)) {
@@ -210,6 +217,7 @@ void loadtaakGif(int index) {
 }
 
 void loadhintGif(int index) {
+  gif.freeFrameBuf(GIFFree);
   gif.close();
   gif.begin(GIF_PALETTE_RGB565_BE);
   if (gif.open((uint8_t *)hintgifData[index], hintgifSizes[index], GIFDraw)) {
@@ -236,8 +244,8 @@ bool isButtonPressed(int pin, int &state, int &lastState, unsigned long &lastDeb
 
 // ------ GIF helper functies (Nodig voor bb_spi_lcd) ------
 
-void *GIFAlloc(uint32_t u32Size) { return malloc(u32Size); }
-void GIFFree(void *p) { free(p); }
+void *GIFAlloc(uint32_t u32Size) { return heap_caps_malloc(u32Size, MALLOC_CAP_SPIRAM); }
+void GIFFree(void *p) { heap_caps_free(p); }
 void GIFDraw(GIFDRAW *pDraw) {
   if (pDraw->y == 0) tft.setAddrWindow(pDraw->iX, pDraw->iY, pDraw->iWidth, pDraw->iHeight);
   tft.pushPixels((uint16_t *)pDraw->pPixels, pDraw->iWidth);
