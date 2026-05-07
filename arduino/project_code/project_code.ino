@@ -268,6 +268,12 @@ bool isButtonPressed(int pin, int &state, int &lastState, unsigned long &lastDeb
 void *GIFAlloc(uint32_t u32Size) { return heap_caps_malloc(u32Size, MALLOC_CAP_SPIRAM); }
 void GIFFree(void *p) { heap_caps_free(p); }
 void GIFDraw(GIFDRAW *pDraw) {
-  if (pDraw->y == 0) tft.setAddrWindow(pDraw->iX, pDraw->iY, pDraw->iWidth, pDraw->iHeight);
-  tft.pushPixels((uint16_t *)pDraw->pPixels, pDraw->iWidth);
+  if (pDraw->iY + pDraw->y >= tft.height() || pDraw->iX >= tft.width()) return;
+  tft.pushImage(
+    pDraw->iX,
+    pDraw->iY + pDraw->y,
+    pDraw->iWidth,
+    1,
+    (uint16_t *)pDraw->pPixels
+  );
 }
