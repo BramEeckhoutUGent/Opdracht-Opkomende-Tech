@@ -207,28 +207,36 @@ if (Knipper_Orange_On) {
 
 // ------ Functie om een nieuwe GIF klaar te zetten ------
 void loadtaakGif(int index) {
-  gif.freeFrameBuf(GIFFree);
   gif.close();
-  delay(100); 
+  gif.freeFrameBuf(GIFFree);
+  tft.fillScreen(0);
+  delay(50); 
   yield();
   gif.begin(GIF_PALETTE_RGB565_BE);
   if (gif.open((uint8_t *)taakgifData[index], taakgifSizes[index], GIFDraw)) {
     gif.setDrawType(GIF_DRAW_COOKED);
     if (gif.allocFrameBuf(GIFAlloc) != GIF_SUCCESS) {
-        Serial.println("FOUT: Kon geen PSRAM reserveren voor Taak GIF!"); }
+      Serial.println("PSRAM Allocatie mislukt!");
+    } else {
+      Serial.println("Taak GIF geladen!");
+    }
   }
 }
 
 void loadhintGif(int index) {
-  gif.freeFrameBuf(GIFFree);
   gif.close();
-  delay(100); 
+  gif.freeFrameBuf(GIFFree);
+  tft.fillScreen(0);
+  delay(50); 
   yield();
   gif.begin(GIF_PALETTE_RGB565_BE);
   if (gif.open((uint8_t *)hintgifData[index], hintgifSizes[index], GIFDraw)) {
     gif.setDrawType(GIF_DRAW_COOKED);
     if (gif.allocFrameBuf(GIFAlloc) != GIF_SUCCESS) {
-        Serial.println("FOUT: Kon geen PSRAM reserveren voor Hint GIF!"); }
+      Serial.println("PSRAM Allocatie mislukt!");
+    } else {
+      Serial.println("Hint GIF geladen!");
+    }
   }
 }
 
