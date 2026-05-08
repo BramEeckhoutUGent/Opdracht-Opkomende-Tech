@@ -42,7 +42,7 @@
 
 // --- DFPlayer Mini ---
 #define DF_RX 18 // verbind met TX van de DFPlayer mini
-#define DF_TX 17 // verbind met RX van de DFPlayer mini + 1k weerstand
+#define DF_TX 17 // verbind met RX van de DFPlayer mini (+ 1k weerstand als VCC aangesloten is op 5V)
 
 // --- Drukknoppen ---
 #define Blauwe_knop 3
@@ -96,14 +96,14 @@ void setup() {
   Serial.begin(115200);
   Serial2.begin(9600, SERIAL_8N1, 18, 17);
   
-  if (!myDFPlayer.begin(Serial2)) {
+  if (!myDFPlayer.begin(Serial2)) { // kleine status controle. Ik merk op dat de dfplayer op 3.3V niet altijd werkt. Kan opgelost worden door serial monitor eens aan/uit te doen.
     Serial.println("DFPlayer error: Check verbinding en SD-kaart!");
   } else {
     Serial.println("DFPlayer online!");
   }
-  myDFPlayer.volume(20);
+  myDFPlayer.volume(20); // volume gaat van 0 t.e.m. 30
 
-  if (psramInit()) {
+  if (psramInit()) { // we werken niet met de SD kaatr lezer op het TFT scherm. We werken met het PSRAM (8Mb) van de ESP32. Dit is een kleine statuscontrole.
     Serial.println("PSRAM succesvol geïnitialiseerd!");
   } else {
     Serial.println("PSRAM niet gevonden!");
@@ -127,15 +127,15 @@ void setup() {
 }
 
 void loop() {
-  if (Taak_gedaan) return;
+  if (Taak_gedaan) return; // Soms heeft de esp32 moeilijk met switchen van gifs. Daarom heb ik hier een korte return funcie gezet.
   unsigned long nu = millis();
 
   // --- Optie 1: Ga door naar de volgende taak (blauwe knop + blauwe LED knipperen + groene LED) ---
-  if (isButtonPressed(Blauwe_knop, nextState, lastNextState, lastNextDebounce)) { // Deze code werd gegenereerd door AI (gemini)
-    Huidige_taak++;                                                                 // |||||||||||||||||||||||||||||||||||||||||||
-    Wordt_actie_getoond = false;                                                    // |||||||||||||||||||||||||||||||||||||||||||
+  if (isButtonPressed(Blauwe_knop, nextState, lastNextState, lastNextDebounce)) { // [!] Deze code werd gegenereerd door AI (gemini)
+    Huidige_taak++;                                                               // |||||||||||||||||||||||||||||||||||||||||||||||
+    Wordt_actie_getoond = false;                                                  // |||||||||||||||||||||||||||||||||||||||||||||||
     
-    myDFPlayer.play(1);
+    myDFPlayer.play(1); // speelt geluidje dat taak gedaan is
 
     Knipper_Blauw_On = true;
     Knipper_Blauw_Start = nu;
@@ -143,8 +143,8 @@ void loop() {
     Groen_Start = nu;
     digitalWrite(Groene_led, HIGH);
 
-    if (Huidige_taak < GIF_COUNT) {
-      Serial.printf("Naar taak %d\n", Huidige_taak + 1);
+    if (Huidige_taak < GIF_COUNT) { // zorgt voor opvolging van taak 1 naar 3. Zal na de derde taak een zwart scherm geven.
+      Serial.printf("Naar taak %d\n", Huidige_taak + 1); // [!] Deze code werd gegenereerd door AI (gemini)
       tft.fillScreen(TFT_BLACK);
       loadtaakGif(Huidige_taak);
     } else {
@@ -156,19 +156,19 @@ void loop() {
   }
 
   // --- Optie 2: Geef extra instructies (oranje knop + oranje LED) ---
-  if (!Taak_gedaan && isButtonPressed(Orange_knop, actionState, lastActionState, lastActionDebounce)) { // Deze code werd gegenereerd door AI (gemini)
-    if (!Wordt_actie_getoond) {                                                                        // |||||||||||||||||||||||||||||||||||||||||||
-      Serial.println("Kindje wil extra hulp");                                                         // |||||||||||||||||||||||||||||||||||||||||||
-      Wordt_actie_getoond = true;                                                                      // |||||||||||||||||||||||||||||||||||||||||||
+  if (!Taak_gedaan && isButtonPressed(Orange_knop, actionState, lastActionState, lastActionDebounce)) { // [!] Deze code werd gegenereerd door AI (gemini)
+    if (!Wordt_actie_getoond) {                                                                         // |||||||||||||||||||||||||||||||||||||||||||||||
+      Serial.println("Kindje wil extra hulp");                                                          // |||||||||||||||||||||||||||||||||||||||||||||||
+      Wordt_actie_getoond = true;                                                                       // |||||||||||||||||||||||||||||||||||||||||||||||
       
       Knipper_Orange_On = true;
       Knipper_Orange_Start = nu;
 
-      myDFPlayer.play(Huidige_taak + 1);
-      delay(100); 
+      myDFPlayer.play(Huidige_taak + 2); // speelt het geluidsbestand dat overeenkomt met de taak
+      delay(100); // kleine pauze toegevoegd omdat signaal van gif en audio tegelijk verzonden wordt. Volgens AI heeft dat te maken met te veel informatie in de SPI-bus?
       yield();
       
-      tft.fillScreen(TFT_BLACK);
+      tft.fillScreen(TFT_BLACK); // altijd bij het switchen van gifs eerst kort een zwart scherm toevoegen, dat helpt bij het renderen.
       loadhintGif(Huidige_taak);
       return;
     }
@@ -210,39 +210,40 @@ if (Knipper_Orange_On) {
 }
 
 
-// ------ Functie om een nieuwe GIF klaar te zetten ------
-void loadtaakGif(int index) {
+// ------ Functie om een nieuwe taak GIF klaar te zetten ------
+void loadtaakGif(int index) {                                                   // [!] Deze code werd gegenereerd door AI (gemini)
   Serial.println("Vrijmaken geheugen...");
   gif.close();
   gif.freeFrameBuf(GIFFree);
   delay(100); 
   yield();
-  Serial.printf("PSRAM vrij voor start: %d bytes\n", ESP.getFreePsram());
-  gif.begin(GIF_PALETTE_RGB565);
-  if (gif.open((uint8_t *)taakgifData[index], taakgifSizes[index], GIFDraw)) {
-    gif.setDrawType(GIF_DRAW_COOKED);
-    if (gif.allocFrameBuf(GIFAlloc) != GIF_SUCCESS) {
-      Serial.println("PSRAM Allocatie mislukt!");
-    } else {
-      Serial.println("Taak GIF geladen!");
+  Serial.printf("PSRAM vrij voor start: %d bytes\n", ESP.getFreePsram());       // [!] Deze code werd gegenereerd door AI (gemini)
+  gif.begin(GIF_PALETTE_RGB565_BE);                                             // |||||||||||||||||||||||||||||||||||||||||||||||
+  if (gif.open((uint8_t *)taakgifData[index], taakgifSizes[index], GIFDraw)) {  // |||||||||||||||||||||||||||||||||||||||||||||||
+    gif.setDrawType(GIF_DRAW_COOKED);                                           // |||||||||||||||||||||||||||||||||||||||||||||||
+    if (gif.allocFrameBuf(GIFAlloc) != GIF_SUCCESS) {                           // |||||||||||||||||||||||||||||||||||||||||||||||
+      Serial.println("PSRAM Allocatie mislukt!");                               // |||||||||||||||||||||||||||||||||||||||||||||||
+    } else {                                                                    // |||||||||||||||||||||||||||||||||||||||||||||||
+      Serial.println("Taak GIF geladen!");                                      // |||||||||||||||||||||||||||||||||||||||||||||||
     }
   }
 }
 
-void loadhintGif(int index) {
+// ------ Functie om een nieuwe hint GIF klaar te zetten ------
+void loadhintGif(int index) {                                                   // [!] Deze code werd gegenereerd door AI (gemini)
   Serial.println("Vrijmaken geheugen...");
   gif.close();
   gif.freeFrameBuf(GIFFree);
   delay(100); 
   yield();
-  Serial.printf("PSRAM vrij voor start: %d bytes\n", ESP.getFreePsram());
-  gif.begin(GIF_PALETTE_RGB565);
-  if (gif.open((uint8_t *)hintgifData[index], hintgifSizes[index], GIFDraw)) {
-    gif.setDrawType(GIF_DRAW_COOKED);
-    if (gif.allocFrameBuf(GIFAlloc) != GIF_SUCCESS) {
-      Serial.println("PSRAM Allocatie mislukt!");
-    } else {
-      Serial.println("Hint GIF geladen!");
+  Serial.printf("PSRAM vrij voor start: %d bytes\n", ESP.getFreePsram());       // [!] Deze code werd gegenereerd door AI (gemini)
+  gif.begin(GIF_PALETTE_RGB565_BE);                                             // |||||||||||||||||||||||||||||||||||||||||||||||
+  if (gif.open((uint8_t *)hintgifData[index], hintgifSizes[index], GIFDraw)) {  // |||||||||||||||||||||||||||||||||||||||||||||||
+    gif.setDrawType(GIF_DRAW_COOKED);                                           // |||||||||||||||||||||||||||||||||||||||||||||||
+    if (gif.allocFrameBuf(GIFAlloc) != GIF_SUCCESS) {                           // |||||||||||||||||||||||||||||||||||||||||||||||
+      Serial.println("PSRAM Allocatie mislukt!");                               // |||||||||||||||||||||||||||||||||||||||||||||||
+    } else {                                                                    // |||||||||||||||||||||||||||||||||||||||||||||||
+      Serial.println("Hint GIF geladen!");                                      // |||||||||||||||||||||||||||||||||||||||||||||||
     }
   }
 }
@@ -265,19 +266,17 @@ bool isButtonPressed(int pin, int &state, int &lastState, unsigned long &lastDeb
 
 // ------ GIF helper functies (Nodig voor bb_spi_lcd) ------
 
-void *GIFAlloc(uint32_t u32Size) { return heap_caps_malloc(u32Size, MALLOC_CAP_SPIRAM); }
-void GIFFree(void *p) { heap_caps_free(p); }
+void *GIFAlloc(uint32_t u32Size) { return heap_caps_malloc(u32Size, MALLOC_CAP_SPIRAM); } // [!] Deze code werd gegenereerd door AI (gemini)
+void GIFFree(void *p) { heap_caps_free(p); }                                              // |||||||||||||||||||||||||||||||||||||||||||||||                
+
+// Dit is de manier van de gif tekenen. Deels gevolgd uit de tutorial, ook AI.
 void GIFDraw(GIFDRAW *pDraw) {
-  uint16_t *pPixels = (uint16_t *)pDraw->pPixels;
-  int iWidth = pDraw->iWidth;
-  int y = pDraw->iY + pDraw->y;
-
-  tft.setAddrWindow(pDraw->iX, y, iWidth, 1);
-
-  for (int x = 0; x < iWidth; x++) {
-    uint16_t c = pPixels[x];
-    pPixels[x] = (c >> 8) | (c << 8); 
-  }
-
-  tft.pushPixels(pPixels, iWidth);
+  if (pDraw->iY + pDraw->y >= tft.height() || pDraw->iX >= tft.width()) return;
+  tft.pushImage(
+    pDraw->iX,
+    pDraw->iY + pDraw->y,
+    pDraw->iWidth,
+    1,
+    (uint16_t *)pDraw->pPixels
+  );
 }

@@ -40,8 +40,18 @@ void setup() { // Visuele controle van de werking van het scherm door het scherm
   while (!Serial) {
     delay(10); 
   }
+  
+  Serial.println("\n Start Test!"); // Dit wordt gedaan omdat ik naast visuele feedback ook feedback
+  Serial2.begin(9600, SERIAL_8N1, 18, 17);
+  
+  if (!myDFPlayer.begin(Serial2)) {
+    Serial.println("DFPlayer error: Check verbinding en SD-kaart!");
+  } else {
+    Serial.println("DFPlayer online!");
+  }
+  myDFPlayer.volume(20);
 
-  Serial.println("\n Start Test!"); // Dit wordt gedaan omdat ik naast visuele feedback ook feedback wil krijgen via de Serialmonitor => dan weet ik op welke plaats in de code ik moet kijken.
+   wil krijgen via de Serialmonitor => dan weet ik op welke plaats in de code ik moet kijken.
 
   SPI.begin(SPI_SCK, SPI_MISO, SPI_MOSI); // Initialiseer SPI (Werd door AI als aparte stap gedaan, los van Adafruit_ILI9341 tft = ...
 
