@@ -135,7 +135,7 @@ void loop() {
     Huidige_taak++;                                                               // |||||||||||||||||||||||||||||||||||||||||||||||
     Wordt_actie_getoond = false;                                                  // |||||||||||||||||||||||||||||||||||||||||||||||
     
-    myDFPlayer.play(1); // speelt geluidje dat taak gedaan is
+    //myDFPlayer.play(1); // speelt geluidje dat taak gedaan is
 
     Knipper_Blauw_On = true;
     Knipper_Blauw_Start = nu;
@@ -164,7 +164,7 @@ void loop() {
       Knipper_Orange_On = true;
       Knipper_Orange_Start = nu;
 
-      myDFPlayer.play(Huidige_taak + 2); // speelt het geluidsbestand dat overeenkomt met de taak
+      //myDFPlayer.play(Huidige_taak + 2); // speelt het geluidsbestand dat overeenkomt met de taak
       delay(100); // kleine pauze toegevoegd omdat signaal van gif en audio tegelijk verzonden wordt. Volgens AI heeft dat te maken met te veel informatie in de SPI-bus?
       yield();
       
