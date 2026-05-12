@@ -35,13 +35,13 @@
 #define TFT_CS    10
 #define TFT_DC    9
 #define TFT_RST   8
-#define TFT_LED   -1 // waarde is -1 want deze sturen we niet aan door een poort, maar verbinden met 3.3V poort
+#define TFT_LED   21
 #define TFT_MISO  13
 #define TFT_MOSI  11
 #define TFT_CLK   12
 
 // --- DFPlayer Mini ---
-#define DF_RX 18 // verbind met TX van de DFPlayer mini
+#define DF_RX 16 // verbind met TX van de DFPlayer mini
 #define DF_TX 17 // verbind met RX van de DFPlayer mini (+ 1k weerstand als VCC aangesloten is op 5V)
 
 // --- Drukknoppen ---
@@ -94,7 +94,7 @@ bool Groen_On = false;
 // ------ Start Code ------
 void setup() {
   Serial.begin(115200);
-  Serial2.begin(9600, SERIAL_8N1, 18, 17);
+  Serial2.begin(9600, SERIAL_8N1, DF_RX, DF_TX);
   
   if (!myDFPlayer.begin(Serial2)) { // kleine status controle. Ik merk op dat de dfplayer op 3.3V niet altijd werkt. Kan opgelost worden door serial monitor eens aan/uit te doen.
     Serial.println("DFPlayer error: Check verbinding en SD-kaart!");
@@ -118,6 +118,9 @@ void setup() {
   digitalWrite(Blauwe_led, HIGH);
   digitalWrite(Orange_led, HIGH);
   digitalWrite(Groene_led, LOW);
+
+  pinMode(TFT_LED, OUTPUT);
+  digitalWrite(TFT_LED, HIGH);
   
   tft.begin(LCD_ILI9341, FLAGS_NONE, 40000000, TFT_CS, TFT_DC, TFT_RST, TFT_LED, TFT_MISO, TFT_MOSI, TFT_CLK);
   tft.setRotation(LCD_ORIENTATION_90);
@@ -135,7 +138,7 @@ void loop() {
     Huidige_taak++;                                                               // |||||||||||||||||||||||||||||||||||||||||||||||
     Wordt_actie_getoond = false;                                                  // |||||||||||||||||||||||||||||||||||||||||||||||
     
-    //myDFPlayer.play(1); // speelt geluidje dat taak gedaan is
+    myDFPlayer.play(1); // speelt geluidje dat taak gedaan is
 
     Knipper_Blauw_On = true;
     Knipper_Blauw_Start = nu;
@@ -164,7 +167,7 @@ void loop() {
       Knipper_Orange_On = true;
       Knipper_Orange_Start = nu;
 
-      //myDFPlayer.play(Huidige_taak + 2); // speelt het geluidsbestand dat overeenkomt met de taak
+      myDFPlayer.play(Huidige_taak + 2); // speelt het geluidsbestand dat overeenkomt met de taak
       delay(100); // kleine pauze toegevoegd omdat signaal van gif en audio tegelijk verzonden wordt. Volgens AI heeft dat te maken met te veel informatie in de SPI-bus?
       yield();
       
