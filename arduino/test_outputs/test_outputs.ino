@@ -41,8 +41,8 @@ void setup() { // Visuele controle van de werking van het scherm door het scherm
     delay(10); 
   }
   
-  Serial.println("\n Start Test!"); // Dit wordt gedaan omdat ik naast visuele feedback ook feedback
-  Serial2.begin(9600, SERIAL_8N1, 18, 17);
+  Serial.println("\n Start Test!"); // Dit wordt gedaan omdat ik naast visuele feedback ook feedback wil via de serial monitor
+  Serial2.begin(9600, SERIAL_8N1, 16, 17);
   
   if (!myDFPlayer.begin(Serial2)) {
     Serial.println("DFPlayer error: Check verbinding en SD-kaart!");
