@@ -177,6 +177,7 @@ void loop() {
     }
   }
 
+// --- LED timers en status updates ---
 if (Knipper_Blauw_On) {
     if (nu - Knipper_Blauw_Start < 3000) {
       if ((nu / 200) % 2 == 0) digitalWrite(Blauwe_led, HIGH);
@@ -268,7 +269,6 @@ bool isButtonPressed(int pin, int &state, int &lastState, unsigned long &lastDeb
 
 
 // ------ GIF helper functies (Nodig voor bb_spi_lcd) ------
-
 void *GIFAlloc(uint32_t u32Size) { return heap_caps_malloc(u32Size, MALLOC_CAP_SPIRAM); } // [!] Deze code werd gegenereerd door AI (gemini)
 void GIFFree(void *p) { heap_caps_free(p); }                                              // |||||||||||||||||||||||||||||||||||||||||||||||                
 
