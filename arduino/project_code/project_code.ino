@@ -45,13 +45,13 @@
 #define DF_TX 17 // verbind met RX van de DFPlayer mini (+ 1k weerstand als VCC aangesloten is op 5V)
 
 // --- Drukknoppen ---
-#define Blauwe_knop 3
+#define Blauwe_knop 5
 #define Orange_knop 7
 
 // --- LED's ---
-#define Blauwe_led 4 
-#define Orange_led 6
-#define Groene_led 5
+#define Blauwe_led 4
+#define Orange_led 15
+#define Groene_led 6
 
 
 // ------ Definieer variabelen -------
