@@ -45,12 +45,12 @@
 #define DF_TX 17 // verbind met RX van de DFPlayer mini (+ 1k weerstand als VCC aangesloten is op 5V)
 
 // --- Drukknoppen ---
-#define Blauwe_knop 5
-#define Orange_knop 7
+#define Blauwe_knop 15
+#define Orange_knop 5
 
 // --- LED's ---
 #define Blauwe_led 4
-#define Orange_led 15
+#define Orange_led 7
 #define Groene_led 6
 
 
@@ -101,9 +101,9 @@ void setup() {
   } else {
     Serial.println("DFPlayer online!");
   }
-  myDFPlayer.volume(20); // volume gaat van 0 t.e.m. 30
+  myDFPlayer.volume(30); // volume gaat van 0 t.e.m. 30
 
-  if (psramInit()) { // we werken niet met de SD kaatr lezer op het TFT scherm. We werken met het PSRAM (8Mb) van de ESP32. Dit is een kleine statuscontrole.
+  if (psramInit()) { // we werken niet met de SD kaartlezer op het TFT scherm. We werken met het PSRAM (8Mb) van de ESP32. Dit is een kleine statuscontrole.
     Serial.println("PSRAM succesvol geïnitialiseerd!");
   } else {
     Serial.println("PSRAM niet gevonden!");
