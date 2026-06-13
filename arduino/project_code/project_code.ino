@@ -16,18 +16,18 @@
 // --- Taakjes ---
 #include "gif_files/Taak_1_Opruimen.h"
 #include "gif_files/Taak_2_Tandenpoetsen.h"
-#include "gif_files/Taak_3_Jasje.h"
+#include "gif_files/Taak_3_Klaarmaken.h"
 #define GifData Taak_1_Opruimen
 #define GifData Taak_2_Tandenpoetsen
-#define GifData Taak_3_Jasje
+#define GifData Taak_3_Klaarmaken
 
 // --- Hints ---
 #include "gif_files/Hint_1_Opruimen.h"
 #include "gif_files/Hint_2_Tandenpoetsen.h"
-#include "gif_files/Hint_3_Jasje.h"
+#include "gif_files/Hint_3_Klaarmaken.h"
 #define GifData Hint_1_Opruimen
 #define GifData Hint_2_Tandenpoetsen
-#define GifData Hint_3_Jasje
+#define GifData Hint_3_Klaarmaken
 
 
 // ------ Definieer pinnen -------
@@ -68,12 +68,12 @@ bool Taak_gedaan = false;
 
 // --- GIF data voor de taakjes ---
 #define GIF_COUNT 3
-const uint8_t* taakgifData[GIF_COUNT] = {Taak_1_Opruimen, Taak_2_Tandenpoetsen, Taak_3_Jasje};
-const size_t taakgifSizes[GIF_COUNT] = {sizeof(Taak_1_Opruimen), sizeof(Taak_2_Tandenpoetsen), sizeof(Taak_3_Jasje)};
+const uint8_t* taakgifData[GIF_COUNT] = {Taak_1_Opruimen, Taak_2_Tandenpoetsen, Taak_3_Klaarmaken};
+const size_t taakgifSizes[GIF_COUNT] = {sizeof(Taak_1_Opruimen), sizeof(Taak_2_Tandenpoetsen), sizeof(Taak_3_Klaarmaken)};
 
 // --- GIF data voor de hints ---
-const uint8_t* hintgifData[GIF_COUNT] = {Hint_1_Opruimen, Hint_2_Tandenpoetsen, Hint_3_Jasje};
-const size_t hintgifSizes[GIF_COUNT] = {sizeof(Hint_1_Opruimen), sizeof(Hint_2_Tandenpoetsen), sizeof(Hint_3_Jasje)};
+const uint8_t* hintgifData[GIF_COUNT] = {Hint_1_Opruimen, Hint_2_Tandenpoetsen, Hint_3_Klaarmaken};
+const size_t hintgifSizes[GIF_COUNT] = {sizeof(Hint_1_Opruimen), sizeof(Hint_2_Tandenpoetsen), sizeof(Hint_3_Klaarmaken)};
 
 // --- Debounce variabelen ---
 // [!] Deze code werd gegenereerd door AI (gemini)
@@ -90,6 +90,8 @@ bool Knipper_Blauw_On = false;
 bool Knipper_Orange_On = false;
 bool Groen_On = false;
 
+// --- Reset timer ---
+unsigned long Knoppen_Samen_Ingedrukt_Start = 0;
 
 // ------ Start Code ------
 void setup() {
@@ -130,9 +132,45 @@ void setup() {
 }
 
 void loop() {
-  if (Taak_gedaan) return; // Soms heeft de esp32 moeilijk met switchen van gifs. Daarom heb ik hier een korte return funcie gezet.
   unsigned long nu = millis();
 
+  // --- RESET LOGICA: Beide knoppen 5 seconden ingedrukt houden ---
+  // Omdat INPUT_PULLUP is gebruikt, is een knop ingedrukt als de status LOW is.
+  if (digitalRead(Blauwe_knop) == LOW && digitalRead(Orange_knop) == LOW) {
+    if (Knoppen_Samen_Ingedrukt_Start == 0) {
+      Knoppen_Samen_Ingedrukt_Start = nu;
+      Serial.println("Beide knoppen ingedrukt... Timer gestart.");
+    } else if (nu - Knoppen_Samen_Ingedrukt_Start >= 5000) {
+      Serial.println("SYSTEM RESET: Terug naar taak 1!");
+
+      // 1. Reset alle status variabelen
+      Huidige_taak = 0;
+      Wordt_actie_getoond = false;
+      Taak_gedaan = false;
+
+      // 2. Reset alle LED timers en zet LEDs in beginstand
+      Knipper_Blauw_On = false;
+      Knipper_Orange_On = false;
+      Groen_On = false;
+      digitalWrite(Blauwe_led, HIGH);
+      digitalWrite(Orange_led, HIGH);
+      digitalWrite(Groene_led, LOW);
+
+      // 3. Maak scherm leeg en laad de eerste taak opnieuw
+      tft.fillScreen(TFT_BLACK);
+      loadtaakGif(Huidige_taak);
+
+      // Reset de timer zodat we niet in een oneindige reset-loop blijven hangen
+      Knoppen_Samen_Ingedrukt_Start = 0;
+      
+      delay(1000); 
+      return; 
+    }
+  } else {
+    // Zodra één van de twee knoppen (of allebei) wordt losgelaten, resetten we de timer
+    Knoppen_Samen_Ingedrukt_Start = 0;
+  }
+  
   // --- Optie 1: Ga door naar de volgende taak (blauwe knop + blauwe LED knipperen + groene LED) ---
   if (isButtonPressed(Blauwe_knop, nextState, lastNextState, lastNextDebounce)) { // [!] Deze code werd gegenereerd door AI (gemini)
     Huidige_taak++;                                                               // |||||||||||||||||||||||||||||||||||||||||||||||
